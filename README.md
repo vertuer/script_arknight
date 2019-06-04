@@ -2,9 +2,9 @@
 ## 1.简介
   自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本，可以参考。
 
-明日方舟调用库：
-PIL，pywin32-223，opencv-3.4.3
-少女前线调用库：
+明日方舟调用库：  
+PIL，pywin32-223，opencv-3.4.3  
+少女前线调用库：  
 多一个pyocr-0.5.3
 
 
@@ -28,7 +28,7 @@ PIL，pywin32-223，opencv-3.4.3
 
 ## 5.使用说明
   basic_function.py文件为基础的窗体消息函数，如鼠标点击，获取窗体图像等  
-  function_ark.py文件为封装好的具体操作函数及类，实现脚本的具体操作
-  config_ark.py文件为配置文件，包含识别图像的映射关系及一些预设置常量
-  globalvar.py存放全局变量
+  function_ark.py文件为封装好的具体操作函数及类，实现脚本的具体操作  
+  config_ark.py文件为配置文件，包含识别图像的映射关系及一些预设置常量  
+  globalvar.py存放全局变量  
   test3.py为主文件
