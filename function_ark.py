@@ -4,6 +4,7 @@ import os
 import config_ark
 # time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
 def judge_where(handle,count_max=60):
+    #判断当前位置
     def _judge(im):
         for keys,pic_data in config_ark.pic_where.items():
             if pic_locate(pic_data, im, config_ark.THRESH_PIC,False,True) != None:
@@ -30,6 +31,7 @@ def judge_where(handle,count_max=60):
     return current_pos
 
 def confirm_where(handle,pic_data,rgb_bool = True,confirm_once=True):
+    #验证当前是否处于某位置
     def _judge(im):
         if pic_locate(pic_data, im, config_ark.THRESH_PIC, rgb_bool= rgb_bool,findall=False) != None:
             return True
@@ -62,6 +64,7 @@ def confirm_where(handle,pic_data,rgb_bool = True,confirm_once=True):
     return exist
 
 def pic_position(handle,pic_data,thresh=config_ark.THRESH_PIC,findall=False,once=False):
+    #寻找图像位于模拟器的像素位置，左上为（0，0）
     count = 0
     if once != False and once != True:
         count_max = once

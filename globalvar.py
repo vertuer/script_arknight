@@ -1,7 +1,7 @@
 class global_val:
-    max_resolution = [1920,1080]
-    window_resolution = [0,0]
-    yuanshi_used = 0
+    max_resolution = [1920,1080] #图片素材的分辨率
+    window_resolution = [0,0]    #当前模拟器的分辨率
+    yuanshi_used = 0             #已经碎石的数量
 
 def get_max_resolution():
     return global_val.max_resolution

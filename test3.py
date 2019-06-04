@@ -10,7 +10,7 @@ from basic_function import pic_locate,prtsc,get_handle,mouse_scroll
 import function_ark
 import globalvar
 def pic_load_ram():
-    get_handle([1280,720])
+    get_handle()
     for keys,pic_path in config_ark.pic_confirm.items():
         temp_im = Image.open(pic_path)
         temp_im = temp_im.convert("RGB")
@@ -209,24 +209,24 @@ class Shark_Event:
             time.sleep(3)
 
 if __name__ == "__main__":
-    pic_load_ram()
-    handle = get_handle([1280,720])
-    current_pos = function_ark.judge_where(handle,4)
-    temp_class = Shark_Event(handle,num=20,guanqia="GT6")
+    temp = ["GT2","GT3","GT4","GT5","GT6"]              #支持的关卡
+    pic_load_ram()                                          #将配置文件中的图像载入内存
+    handle = get_handle([1280,720])                         #获取模拟器窗体句柄
+    temp_class = Shark_Event(handle,num=20,guanqia=temp[4])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
     temp_class.start()
 
-    handle = get_handle([1280, 720])
-    position = function_ark.pic_position(handle,config_ark.pic_where['zhandou_end'])
-    haha = function_ark.confirm_where(handle, "GT3", True, False)
-    im1 = Image.open(config_ark.pic_huodong["GT2"])
-    #im1 = Image.open(pic_confirm["daili_do"])
-    im_origin = Image.open("./ark_images/unprocessed/720p-xuanze.png")
-    #position = pic_locate(pic_others["daili_do"], np.array(im_origin), 0.1,True,True)
-    width = int(1280 / 1920 * im1.size[0])
-    height = int(720 / 1080 * im1.size[1])
-    im1 = im1.resize((width, height), Image.ANTIALIAS)
-    position = pic_locate(config_ark.pic_confirm["GT2"], np.array(im_origin), 0.1, True,True)
-    position = pic_locate(np.array(im1), np.array(im_origin), 0.1, True,True)
-
-    handle = get_handle([1280, 720])
-    haha = function_ark.confirm_where(handle,"GT1",True,False)
+    # handle = get_handle([1280, 720])
+    # position = function_ark.pic_position(handle,config_ark.pic_where['zhandou_end'])
+    # haha = function_ark.confirm_where(handle, "GT3", True, False)
+    # im1 = Image.open(config_ark.pic_huodong["GT2"])
+    # #im1 = Image.open(pic_confirm["daili_do"])
+    # im_origin = Image.open("./ark_images/unprocessed/720p-xuanze.png")
+    # #position = pic_locate(pic_others["daili_do"], np.array(im_origin), 0.1,True,True)
+    # width = int(1280 / 1920 * im1.size[0])
+    # height = int(720 / 1080 * im1.size[1])
+    # im1 = im1.resize((width, height), Image.ANTIALIAS)
+    # position = pic_locate(config_ark.pic_confirm["GT2"], np.array(im_origin), 0.1, True,True)
+    # position = pic_locate(np.array(im1), np.array(im_origin), 0.1, True,True)
+    #
+    # handle = get_handle([1280, 720])
+    # haha = function_ark.confirm_where(handle,"GT1",True,False)
