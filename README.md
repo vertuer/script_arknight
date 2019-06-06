@@ -1,5 +1,7 @@
 # script_arknight
+  ![=。=](https://github.com/vertuer/script_arknight/blob/master/processed/f9c6cbdc6b.jpg)
 ## 1.简介
+
   自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本，可以参考。
 
 明日方舟调用库：  
@@ -22,19 +24,21 @@ PIL，pywin32-223，opencv-3.4.3
   6.战斗界面若暂停自动继续
   7.多重检验，不会因卡顿而选错图或者是没有打开代理
 
-## 4.后续增加功能：
-  1.gui  
-  2.打包  
-  3.自动每日主线任务  
-  4.自动基建干员分配  
-
-## 5.使用说明
+## 4.使用说明
   basic_function.py文件为基础的窗体消息函数，如鼠标点击，获取窗体图像等  
   function_ark.py文件为封装好的具体操作函数及类，实现脚本的具体操作  
   config_ark.py文件为配置文件，包含识别图像的映射关系及一些预设置常量  
   globalvar.py存放全局变量  
   test3.py为主文件
-
+  简易界面如下    
+  ![=。=](https://github.com/vertuer/script_arknight/blob/master/processed/script.png)
+  
+## 5.后续增加功能：
+  1.gui  
+  2.打包  
+  3.自动每日主线任务  
+  4.自动基建干员分配  
+  
 ## 6.更新内容
 ### （2019-6-6）
   1.界面设计，基本功能满足  
