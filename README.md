@@ -1,7 +1,8 @@
 # script_arknight
   ![=。=](https://github.com/vertuer/script_arknight/blob/master/processed/f9c6cbdc6b.jpg)
 ## 1.简介
-
+  [EXE文件网盘链接](https://pan.baidu.com/s/1Grjm9BY7XDuY1Qi6nxwS6w)  
+  提取码：7u9v  
   自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本，可以参考。
 
 明日方舟调用库：  
@@ -21,7 +22,7 @@ PIL，pywin32-223，opencv-3.4.3
   3.脚本开始位置无要求，可以从不同界面，或者是战斗中等开始脚本  
   4.自适应分辨率，最高支持1080p， 目前测试了720p没有问题  
   5.支持夜神模拟器  
-  6.战斗界面若暂停自动继续
+  6.战斗界面若暂停自动继续  
   7.多重检验，不会因卡顿而选错图或者是没有打开代理
 
 ## 4.使用说明
@@ -42,4 +43,4 @@ PIL，pywin32-223，opencv-3.4.3
 ## 6.更新内容
 ### （2019-6-6）
   1.界面设计，基本功能满足  
-  2.exe打包
+  2.exe打包，真是个大坑
