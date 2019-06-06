@@ -10,12 +10,14 @@ from basic_function import pic_locate,prtsc,get_handle,mouse_scroll
 import function_ark
 import globalvar
 def pic_load_ram():
-    get_handle()
+    #must run get handle first
+    window_resolution = globalvar.get_window_resolution()
+    max_resolution = globalvar.get_max_resolution()
+    if window_resolution[0]==0:
+        raise Exception("未检测到模拟器")
     for keys,pic_path in config_ark.pic_confirm.items():
         temp_im = Image.open(pic_path)
         temp_im = temp_im.convert("RGB")
-        window_resolution = globalvar.get_window_resolution()
-        max_resolution = globalvar.get_max_resolution()
         width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
         height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
         temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
@@ -24,8 +26,6 @@ def pic_load_ram():
     for keys, pic_path in config_ark.pic_huodong.items():
         temp_im = Image.open(pic_path)
         temp_im = temp_im.convert("RGB")
-        window_resolution = globalvar.get_window_resolution()
-        max_resolution = globalvar.get_max_resolution()
         width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
         height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
         temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
@@ -34,16 +34,12 @@ def pic_load_ram():
     for keys, pic_path in config_ark.pic_where.items():
         temp_im = Image.open(pic_path)
         temp_im = temp_im.convert("RGB")
-        window_resolution = globalvar.get_window_resolution()
-        max_resolution = globalvar.get_max_resolution()
         width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
         height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
         temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
         config_ark.pic_where[keys] = np.array(temp_im)
     #常量点 自定义分辨率适应
     for keys,values in config_ark.points.items():
-        window_resolution = globalvar.get_window_resolution()
-        max_resolution = globalvar.get_max_resolution()
         width = int(window_resolution[0] / max_resolution[0] * values[0])
         height = int(window_resolution[1] / max_resolution[1] * values[1])
         config_ark.points[keys] = [width,height]
@@ -88,7 +84,7 @@ class Shark_Event:
                 globalvar.yuanshi_used_add(1)
             else:
                 function_ark.mouse_click(self.handle,config_ark.points["yuanshi_no"])
-                print("石乐志，结束\n")
+                print("石乐志，结束")
                 raise config_ark.ExitError
             time.sleep(1)
 
@@ -120,10 +116,10 @@ class Shark_Event:
                 function_ark.enter_where(self.handle,"zhandou_xuanze")
                 #i += 1
             elif self.operation_sequence[i]=="选择并进入活动界面":
-                position = function_ark.pic_position(handle,config_ark.pic_huodong["huodong_enter"],once=3)
+                position = function_ark.pic_position(self.handle,config_ark.pic_huodong["huodong_enter"],once=3)
                 if position!=None:
                     function_ark.mouse_click(self.handle,position["result"])
-                    position1 = function_ark.pic_position(handle, config_ark.pic_where["huodongjiemian"], once=3)
+                    position1 = function_ark.pic_position(self.handle, config_ark.pic_where["huodongjiemian"], once=3)
                     if position1 != None:
                         function_ark.mouse_click(self.handle, position1["result"])
                     else:
@@ -134,33 +130,38 @@ class Shark_Event:
                     pass
             elif self.operation_sequence[i]=="选择关卡,确认选择正确,使用代理,进入队伍配置界面":
                 function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
-                current_position = function_ark.pic_position(self.handle,config_ark.pic_huodong[self.guanqia])
+                time.sleep(1)
+                current_position = function_ark.pic_position(self.handle,config_ark.pic_huodong[self.guanqia],once=4)
+                if current_position==None:
+                    print("当前非选择关卡")
+                    continue
                 function_ark.mouse_click(self.handle,current_position["result"])
                 time.sleep(1)
                 #i += 1
                 #确认选择正确
                 if function_ark.confirm_where(self.handle,config_ark.pic_confirm[self.guanqia],confirm_once=True):
-                    print("关卡信息正确\n")
+                    print("关卡信息正确")
                     pass
                     #i += 1
                 else:
+                    continue
                     #没有选择正确的关卡，重新进入‘选择关卡’
                     #i = self.operation_mapping["选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
                     pass
                 #使用代理
                 position = function_ark.pic_position(self.handle,config_ark.pic_confirm["daili_do"],once=True)
                 if position != None:
-                    print("代理已使用\n")
+                    print("代理已使用")
                     #i += 1
                     pass
                 else:
                     function_ark.mouse_click(self.handle,config_ark.points['daili'])
-                    print("使用代理\n")
+                    print("使用代理")
                     #i += 1
                 #进入队伍配置界面
                 time.sleep(1)
                 function_ark.mouse_click(self.handle,config_ark.points["peizhi_enter"])
-                print("进入队伍配置界面\n")
+                print("进入队伍配置界面")
                 time.sleep(3)
                 #i += 1
             elif self.operation_sequence[i]=="确认使用代理并开始战斗":
@@ -183,11 +184,11 @@ class Shark_Event:
                     continue
                 while(1):
                     if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_ing"],confirm_once=2):
-                        print("正在战斗中\n")
+                        print("正在战斗中")
                         position = function_ark.pic_position(self.handle,config_ark.pic_confirm["zhandou_pause"],once=True)
                         if position!=None:
                             function_ark.mouse_click(self.handle,position["result"])
-                            print("检测到暂停，继续战斗\n")
+                            print("检测到暂停，继续战斗")
                         time.sleep(config_ark.BATTLE_WAIT)
                     else:
                         #结束
@@ -212,7 +213,7 @@ if __name__ == "__main__":
     temp = ["GT2","GT3","GT4","GT5","GT6"]              #支持的关卡
     pic_load_ram()                                          #将配置文件中的图像载入内存
     handle = get_handle([1280,720])                         #获取模拟器窗体句柄
-    temp_class = Shark_Event(handle,num=20,guanqia=temp[4])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
+    temp_class = Shark_Event(handle,num=20,guanqia=temp[3])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
     temp_class.start()
 
     # handle = get_handle([1280, 720])

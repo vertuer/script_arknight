@@ -148,7 +148,7 @@ def save_im(handle,file_name):
     print("img saved to {}\n".format(file_name))
 
 
-def get_handle(resolution=[1280,720]): #now only the 夜神 is supported
+def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
     handlelist = []
     win32gui.EnumWindows(lambda hWnd, param: param.append([hWnd,
                                                            win32gui.GetClassName(hWnd),
@@ -161,13 +161,17 @@ def get_handle(resolution=[1280,720]): #now only the 夜神 is supported
                                                                         , win32gui.GetClassName(hWnd)
                                                                         , win32gui.GetWindowText(hWnd)])
     if win32gui.GetWindowText(hWnd) in ['QWidgetClassWindow','ScreenBoardClassWindow']  else None, hWndChildList)
-    win = hWndChildList[0][0]
+    try:
+        win = hWndChildList[0][0]
+    except:
+        return -1
     rect = win32gui.GetWindowRect(win)
     globalvar.set_window_resolution([rect[2]-rect[0],rect[3]-rect[1]])
     print("当前窗体大小为{}x{}".format(rect[2]-rect[0],rect[3]-rect[1]))
     if (rect[2] - rect[0])==resolution[0] and (rect[3] - rect[1])==resolution[1]:
-        return win
-
-    raise Exception('resolution isn\'t {}p'.format(resolution[1]))
+        pass
+    else:
+        print('resolution isn\'t {}p'.format(resolution[1]))
+    return win
     # if (rect[2]-rect[0])!=resolution[0] or (rect[3]-rect[1])!=resolution[1]:
     #     raise Exception('resolution isn\'t {}p'.format(resolution[1]))

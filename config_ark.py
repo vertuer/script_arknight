@@ -12,7 +12,7 @@ if os.path.exists(IMG_SAVE):
 else:
     os.makedirs(IMG_SAVE)
 points = {}
-points["kongbai"] = [650,700]
+points["kongbai"] = [200,1000]
 points["peizhi_enter"] = [1741,990]
 points["zhandou_start"] = [1650,800]
 points["daili"] = [1725,890]
