@@ -4,8 +4,8 @@
 </p>
 
 ## 1.简介
-  [EXE文件网盘链接6-7](https://pan.baidu.com/s/1cQlk7nrv1XxnGD5MYPR6kw)  
-  提取码：vmpt  
+  [EXE文件网盘链接6-7](https://pan.baidu.com/s/1oP-e_mdTc9TMgKX_Qowc2w)  
+  提取码：64hq  
   自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本和刷主线1-11，可以参考，可以使用源码二次开发。
 
 明日方舟调用库：  
