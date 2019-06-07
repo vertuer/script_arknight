@@ -22,8 +22,11 @@ def judge_where(handle,count_max=60):
         count+=1
         if count >=count_max:
             if count_max == 60:
-                io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
-                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
+                temp_im = Image.fromarray(im)
+                temp_im.save(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))))
+                # io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                #     time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
                 raise Exception('模拟器可能卡死')
             else:
                 return current_pos
@@ -55,8 +58,11 @@ def confirm_where(handle,pic_data,rgb_bool = True,confirm_once=True):
         count += 1
         if count >= count_max:
             if count_max ==60:
-                io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
-                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
+                temp_im = Image.fromarray(im)
+                temp_im.save(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))))
+                # io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                #     time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
                 raise Exception('模拟器可能卡死')
             else:
                 return exist
@@ -79,8 +85,11 @@ def pic_position(handle,pic_data,thresh=config_ark.THRESH_PIC,findall=False,once
         count +=1
         if count>=count_max:
             if count_max ==60:
-                io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
-                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
+                temp_im = Image.fromarray(im)
+                temp_im.save(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                    time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))))
+                # io.imsave(os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                #     time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))), im)
                 raise Exception('模拟器可能卡死')
             else:
                 return position
@@ -113,3 +122,106 @@ def enter_where(handle,where):
     #enter_where(handle,where) 不使用迭代，较危险
     return False
 
+def enter_chapter(handle,where):
+    #从战斗进入主线
+    #where为主线章节,如 "1-11"
+    position = pic_position(handle,config_ark.pic_where["zhandou_xuanze"],once=True)
+    if position!=None:
+        mouse_click(handle,position["result"])
+        time.sleep(1)
+    else:
+        return False
+    cnt=0
+    chapter = where.split('-')[0]
+    while (1):
+        position = pic_position(handle, config_ark.pic_confirm["chapter{}".format(chapter)],once=1)
+        if position!=None:
+            break
+        mouse_drag(handle, config_ark.points['drag_left'], 20)
+        cnt += 1
+        if cnt > 10:
+            print("主线进入失败，重新进入战斗界面")
+            return False
+
+    mouse_click(handle,position["result"])
+    print("进入chapter{}".format(chapter))
+    return True
+def enter_zhuxian(handle,where):
+    #从章节进入主线
+    cnt = 0
+    while (1):
+        position = pic_position(handle, config_ark.guanqia_pic[where],once=1)
+        if position != None:
+            break
+        mouse_drag(handle, config_ark.points['drag_left'], 20)
+        cnt += 1
+        if cnt > 20:
+            print("主线进入失败，重新进入战斗界面")
+            return False
+    mouse_click(handle, position["result"])
+    print("选择关卡")
+    if confirm_where(handle, config_ark.guanqia_pic["{}_confirm".format(where)], confirm_once=2):
+        mouse_click(handle, config_ark.points["peizhi_enter"])
+        print("进入队伍配置界面")
+    else:
+        return False
+    time.sleep(3)
+    return True
+
+
+def set_direction(handle,xy,direction):
+    #direction left ,right up down
+    if direction == "left":
+        temp_xy = [xy[0]-config_ark.BUSHU_OFFSET,xy[1]]
+        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+    elif direction == "right":
+        temp_xy = [xy[0]+config_ark.BUSHU_OFFSET,xy[1]]
+        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+    elif direction == "up":
+        temp_xy = [xy[0],xy[1]-config_ark.BUSHU_OFFSET]
+        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+    elif direction == "down":
+        temp_xy = [xy[0],xy[1]-config_ark.BUSHU_OFFSET]
+        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+
+def battle_speed_set(handle,speed=2):
+    if speed ==2:
+        position = pic_position(handle,config_ark.pic_confirm["1xspeed"],once=True)
+        if position!=None:
+            mouse_click(handle,position["result"])
+            time.sleep(0.5)
+            if confirm_where(handle,config_ark.pic_confirm["2xspeed"],confirm_once=True):
+                print("战斗速度修改为2x")
+                return True
+        else:
+            print("当前战斗速度为2x")
+            return True
+    return False
+
+def staff_set(handle,name_or_xy,target_xy,direction):
+    """
+    部署干员,自动检查费用是否足够及部署目标位置是否正确
+    :param handle: 窗口句柄
+    :param name_or_xy: 部署干员名称或xy坐标
+    :param target_xy: 部署位置xy坐标
+    :return:  true部署正确，false未知错误
+    """
+    if isinstance(name_or_xy,str):
+        #干员名称
+        assert(name_or_xy in config_ark.staff_pic.keys())
+        staff_pic = config_ark.staff_pic[name_or_xy]
+        i = 0
+        while(i<30):
+            i += 1
+            position = pic_position(handle,staff_pic,config_ark.THRESH_PIC,once=True)
+            if position!=None:
+                mouse_drag(handle,(position["result"],target_xy),config_ark.DRAG_SPEED)
+                time.sleep(1)
+                if confirm_where(handle,config_ark.pic_confirm["bushu_fangxiang"]):
+                    set_direction(handle,target_xy,direction)
+                    time.sleep(2)
+                    return True
+            else:
+                print("No staff{} detected".format(name_or_xy))
+
+        return False
