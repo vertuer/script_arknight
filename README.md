@@ -4,9 +4,9 @@
 </p>
 
 ## 1.简介
-  [EXE文件网盘链接](https://pan.baidu.com/s/1Grjm9BY7XDuY1Qi6nxwS6w)  
-  提取码：7u9v  
-  自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本，可以参考。
+  [EXE文件网盘链接6-7](https://pan.baidu.com/s/1cQlk7nrv1XxnGD5MYPR6kw)  
+  提取码：vmpt  
+  自己写的针对windows模拟器的游戏脚本，现在能自动肝活动本和刷主线1-11，可以参考，可以使用源码二次开发。
 
 明日方舟调用库：  
 PIL，pywin32-223，opencv-3.4.3  
@@ -34,16 +34,23 @@ PIL，pywin32-223，opencv-3.4.3
   config_ark.py文件为配置文件，包含识别图像的映射关系及一些预设置常量  
   globalvar.py存放全局变量  
   test3.py为主文件
-  简易界面如下    
-  ![=。=](https://github.com/vertuer/script_arknight/blob/master/processed/script.png)
-  
+  简易界面如下  
+  ![=。=](https://github.com/vertuer/script_arknight/blob/master/123.png)  
+  1.选择需要刷的关卡  
+  2.输入刷的次数，输入999之类的较大数持续刷图知道理智耗尽  
+  3.若想碎石，则选择对应碎的数量，脚本将在每次理智耗尽后碎石，请注意最大碎石数量  
+  4.若想通过1-11来完成每日，在脚本界面中间的1-11刷图次数下选择对应次数  
+  5.点击开始运行脚本，中途可以点击结束来中断
 ## 5.后续增加功能：
   1.gui  
   2.打包  
   3.自动每日主线任务  
   4.自动基建干员分配  
+  5.其余主线，由于增加了1-11后面更新只要更新图库  
   
 ## 6.更新内容
 ### （2019-6-6）
   1.界面设计，基本功能满足  
   2.exe打包，真是个大坑
+### （2019-6-7）
+  1.增加主线1-11，可以选择刷完活动图后再刷固定次数  
