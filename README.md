@@ -1,5 +1,8 @@
 # script_arknight
-  ![=。=](https://github.com/vertuer/script_arknight/blob/master/processed/f9c6cbdc6b.jpg)
+<p align="left">
+	<img src="https://github.com/vertuer/script_arknight/blob/master/processed/f9c6cbdc6b.jpg" width="250" height="250">
+</p>
+
 ## 1.简介
   [EXE文件网盘链接](https://pan.baidu.com/s/1Grjm9BY7XDuY1Qi6nxwS6w)  
   提取码：7u9v  
