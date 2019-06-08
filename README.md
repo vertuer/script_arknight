@@ -4,7 +4,7 @@
 </p>
 
 ## 1.简介
-  [EXE文件网盘链接6-7](https://pan.baidu.com/s/1zcDeUDW82_KoZUetYCn-mg)  
+  [EXE文件网盘链接6-8](https://pan.baidu.com/s/1zcDeUDW82_KoZUetYCn-mg)  
   提取码：qqb9  
   自己写的针对windows模拟器（暂时只支持夜神模拟器）的游戏脚本，现在能自动肝活动本及常见本和刷主线1-11免理智过日常任务，使用请注册github打个star，可以使用源码二次开发，源码使用请fork，欢迎留言交流。
 
