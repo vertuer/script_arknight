@@ -125,35 +125,55 @@ def enter_where(handle,where):
 def enter_chapter(handle,where):
     #从战斗进入主线
     #where为主线章节,如 "1-11"
-    position = pic_position(handle,config_ark.pic_where["zhandou_xuanze"],once=True)
+    temp = where.split("-")[0]
+    if temp in ["LS","AP","SK","CE"]:
+        temp_str = 'wuzichoubei'
+        sub_class = temp
+    elif temp[-1] in ["1","2","3","4"]:
+        temp_str = "zhuxian"
+        sub_class = "chapter{}".format(temp[-1])
+    elif temp in ["PR"]:
+        temp_str = "xinpiansousuo"
+        sub_class = temp
+    else:
+        #实际上不可能出现
+        temp_str = None
+        sub_class = temp
+        raise Exception
+    position = pic_position(handle,config_ark.pic_confirm[temp_str],once=True)
     if position!=None:
         mouse_click(handle,position["result"])
         time.sleep(1)
     else:
         return False
     cnt=0
-    chapter = where.split('-')[0]
     while (1):
-        position = pic_position(handle, config_ark.pic_confirm["chapter{}".format(chapter)],once=1)
+        position = pic_position(handle, config_ark.pic_confirm[sub_class],once=1)
         if position!=None:
             break
-        mouse_drag(handle, config_ark.points['drag_left'], 20)
+        mouse_drag(handle, config_ark.points['drag_left'], config_ark.DRAG_SPEED)
         cnt += 1
         if cnt > 10:
             print("主线进入失败，重新进入战斗界面")
             return False
 
     mouse_click(handle,position["result"])
-    print("进入chapter{}".format(chapter))
+    print("进入{}".format(temp_str))
     return True
-def enter_zhuxian(handle,where):
+def enter_zhuxian(handle,where,daili_confirm=False):
     #从章节进入主线
+    #开始拖拽至最最右侧
+    #先判定是否有选择的关卡
+    position = pic_position(handle, config_ark.guanqia_pic[where], once=2)
+    if position == None:
+        for i in range(20):
+            mouse_drag(handle, config_ark.points['drag_right'], 3)
     cnt = 0
     while (1):
         position = pic_position(handle, config_ark.guanqia_pic[where],once=1)
         if position != None:
             break
-        mouse_drag(handle, config_ark.points['drag_left'], 20)
+        mouse_drag(handle, config_ark.points['drag_left'], config_ark.DRAG_SPEED)
         cnt += 1
         if cnt > 20:
             print("主线进入失败，重新进入战斗界面")
@@ -161,6 +181,16 @@ def enter_zhuxian(handle,where):
     mouse_click(handle, position["result"])
     print("选择关卡")
     if confirm_where(handle, config_ark.guanqia_pic["{}_confirm".format(where)], confirm_once=2):
+        if daili_confirm==True:
+            position = pic_position(handle, config_ark.pic_confirm["daili_do"], once=True)
+            if position != None:
+                print("代理已使用")
+                # i += 1
+                pass
+            else:
+                mouse_click(handle, config_ark.points['daili'])
+                time.sleep(1)
+                print("使用代理")
         mouse_click(handle, config_ark.points["peizhi_enter"])
         print("进入队伍配置界面")
     else:

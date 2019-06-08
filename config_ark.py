@@ -11,6 +11,7 @@ LOG_PATH = "./log/"
 pic_path = "./ark_images/processed"
 staff_pic_path = "./ark_images/staff"
 guanqia_path = "./ark_images/processed/guanqia"
+huodong_path = "./ark_images/processed/huodong"
 assert(os.path.isdir(pic_path))
 if os.path.exists(IMG_SAVE):
     pass
@@ -29,6 +30,7 @@ points["yuanshi_ok"] = [1420,813]
 points["yuanshi_no"] = [463,813]
 points["skip_yes"] = [1270,775]
 points["drag_left"] = [[580,539],[880,543]]
+points["drag_right"] = [[880,543],[580,539]]
 points["1-11-target-xy"] = [[949,510],[790,629],[649,649],
                             [807,381],[946,285],[936,774]]
 class ReturnToWhere(Exception):
@@ -56,6 +58,18 @@ staff_pic = {
 guanqia_pic = {
     "1-11": os.path.join(guanqia_path, "1-11.png"),
     "1-11_confirm": os.path.join(guanqia_path, "1-11_confirm.png"),
+    "LS-5": os.path.join(guanqia_path, "LS-5.png"),
+    "LS-5_confirm": os.path.join(guanqia_path, "LS-5_confirm.png"),
+    "CE-5": os.path.join(guanqia_path, "CE-5.png"),
+    "CE-5_confirm": os.path.join(guanqia_path, "CE-5_confirm.png"),
+    "AP-5": os.path.join(guanqia_path, "AP-5.png"),
+    "AP-5_confirm": os.path.join(guanqia_path, "AP-5_confirm.png"),
+    "SK-5": os.path.join(guanqia_path, "SK-5.png"),
+    "SK-5_confirm": os.path.join(guanqia_path, "SK-5_confirm.png"),
+    "SK-3": os.path.join(guanqia_path, "SK-3.png"),
+    "SK-3_confirm": os.path.join(guanqia_path, "SK-3_confirm.png"),
+    "S2-12": os.path.join(guanqia_path, "S2-12.png"),
+    "S2-12_confirm": os.path.join(guanqia_path, "S2-12_confirm.png"),
 }
 pic_where = {
     "gonggao": os.path.join(pic_path,"gonggao.png"),
@@ -73,20 +87,20 @@ pic_where = {
 
 }
 pic_huodong = {
-    "GT2": os.path.join(pic_path,"huodong_GT2.png"),
-    "GT3": os.path.join(pic_path,"huodong_GT3.png"),
-    "GT4": os.path.join(pic_path,"huodong_GT4.png"),
-    "GT5": os.path.join(pic_path,"huodong_GT5.png"),
-    "GT6": os.path.join(pic_path,"huodong_GT6.png"),
-    "huodong_enter": os.path.join(pic_path,"zhandou_huodong1.png"),
+    "GT2": os.path.join(huodong_path,"huodong_GT2.png"),
+    "GT3": os.path.join(huodong_path,"huodong_GT3.png"),
+    "GT4": os.path.join(huodong_path,"huodong_GT4.png"),
+    "GT5": os.path.join(huodong_path,"huodong_GT5.png"),
+    "GT6": os.path.join(huodong_path,"huodong_GT6.png"),
+    "huodong_enter": os.path.join(huodong_path,"zhandou_huodong1.png"),
 }
 
 pic_confirm = {
-    "GT2": os.path.join(pic_path, "huodong_GT2_confirm.png"),
-    "GT3": os.path.join(pic_path, "huodong_GT3_confirm.png"),
-    "GT4": os.path.join(pic_path, "huodong_GT4_confirm.png"),
-    "GT5": os.path.join(pic_path, "huodong_GT5_confirm.png"),
-    "GT6": os.path.join(pic_path, "huodong_GT6_confirm.png"),
+    "GT2": os.path.join(huodong_path, "huodong_GT2_confirm.png"),
+    "GT3": os.path.join(huodong_path, "huodong_GT3_confirm.png"),
+    "GT4": os.path.join(huodong_path, "huodong_GT4_confirm.png"),
+    "GT5": os.path.join(huodong_path, "huodong_GT5_confirm.png"),
+    "GT6": os.path.join(huodong_path, "huodong_GT6_confirm.png"),
     "daili_do": os.path.join(pic_path, "daili_do.png"),
     "daili_undo": os.path.join(pic_path, "daili_undo.png"),
     "zhandou_pause": os.path.join(pic_path, "zhandou_pause.png"),
@@ -101,8 +115,19 @@ pic_confirm = {
     "chapter2": os.path.join(pic_path, "chapter2.png"),
     "chapter3": os.path.join(pic_path, "chapter3.png"),
     "chapter4": os.path.join(pic_path, "chapter4.png"),
+    "gouliang": os.path.join(pic_path, "gouliang.png"),
+    "hongpiao": os.path.join(pic_path, "hongpiao.png"),
+    "jiancai": os.path.join(pic_path, "jiancai.png"),
+    "longmenbi": os.path.join(pic_path, "longmenbi.png"),
     "skip": os.path.join(pic_path, "skip.png"),
     "skip_confirm": os.path.join(pic_path, "skip_confirm.png"),
+    "zhuxian": os.path.join(pic_path, "zhandou_jiemian.png"),
+    "wuzichoubei": os.path.join(pic_path, "wuzichoubei.png"),
+    "xinpiansousuo": os.path.join(pic_path, "xinpiansousuo.png"),
+    "LS": os.path.join(pic_path, "gouliang.png"),
+    "AP": os.path.join(pic_path, "hongpiao.png"),
+    "SK": os.path.join(pic_path, "jiancai.png"),
+    "CE": os.path.join(pic_path, "longmenbi.png"),
 }
 pic_others = {
     "daili_undo": os.path.join(pic_path,"daili_undo.png"),

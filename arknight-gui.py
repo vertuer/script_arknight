@@ -59,8 +59,13 @@ class RunThread(threading.Thread):
         self.handle = handle
         threading.Thread.__init__(self)
     def run(self):
-        temp_class = Shark_Event(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)  # 类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
-        temp_class.start()
+        #print("当前选择关卡{}".format())
+        if self.guanqia_infor in ["GT2","GT3","GT4","GT5","GT6"]:
+            temp_class = Shark_Event(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)  # 类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
+            temp_class.start()
+        else:
+            temp_class = Zhuxian(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)
+            temp_class.start()
         temp_zhuxian = zx_1_11(self.handle,self.zhuxian_num)
         temp_zhuxian.start()
         print("脚本运行完成")
@@ -179,7 +184,7 @@ class MyFrame1(wx.Frame):
         self.m_staticText2.Wrap(-1)
         gSizer1.Add(self.m_staticText2, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
 
-        event_choiseChoices = [u"GT2", u"GT3", u"GT4", u"GT5", u"GT6"]
+        event_choiseChoices = [u"GT2", u"GT3", u"GT4", u"GT5", u"GT6", u"CE-5", u"LS-5", u"SK-3", u"SK-5", u"AP-5", u"S2-12"]
         self.event_choise = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, event_choiseChoices, 0)
         self.event_choise.SetSelection(0)
         gSizer1.Add(self.event_choise, 0, wx.ALL, 5)
@@ -201,7 +206,7 @@ class MyFrame1(wx.Frame):
         self.thresh_label.Wrap(-1)
         gSizer4.Add(self.thresh_label, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
 
-        self.num = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        self.num = wx.TextCtrl(self, wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0)
         self.num.SetMaxLength(0)
         gSizer4.Add(self.num, 0, wx.ALL, 5)
 
@@ -221,6 +226,18 @@ class MyFrame1(wx.Frame):
         bSizer3.Add(self.zhuxian_num, 0, wx.ALL, 5)
 
         gSizer4.Add(bSizer3, 1, wx.EXPAND, 5)
+
+        bSizer4 = wx.BoxSizer(wx.VERTICAL)
+
+        self.drag_speed_label = wx.StaticText(self, wx.ID_ANY, u"拖拽速度", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.drag_speed_label.Wrap(-1)
+        bSizer4.Add(self.drag_speed_label, 0, wx.ALL, 5)
+
+        self.drag_speed = wx.Slider(self, wx.ID_ANY, 20, 5, 30, wx.DefaultPosition, wx.DefaultSize,
+                                    wx.SL_HORIZONTAL | wx.SL_INVERSE)
+        bSizer4.Add(self.drag_speed, 0, wx.ALL, 5)
+
+        gSizer4.Add(bSizer4, 1, wx.EXPAND, 5)
 
         bSizer1.Add(gSizer4, 0, wx.EXPAND, 5)
 
@@ -275,7 +292,7 @@ class MyFrame1(wx.Frame):
                 wx.MessageBox("战斗次数请输入数字！！", "提示", wx.OK | wx.ICON_INFORMATION, parent=self)
                 self.num.Clear()
                 return
-
+            config_ark.DRAG_SPEED = int(self.drag_speed.GetValue())
             self.start.Enable(False)
             self.end.Enable(True)
             self.start.SetLabel("正在运行中")

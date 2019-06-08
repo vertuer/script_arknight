@@ -200,6 +200,7 @@ class zx_1_11:
                     return True
                 else:
                     function_ark.confirm_where(self.handle, config_ark.pic_where["zhandou_failed"], confirm_once=2)
+                    print("因未知原因战斗失败，请不要最小化模拟器")
                     function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
                     #从新定位当前位置
                     #判断是否代理未满3星
@@ -266,7 +267,7 @@ class Shark_Event:
                 #若可以快速访问，则直接跳转到战斗主界面
                 function_ark.mouse_click(self.handle,position1["result"])
                 time.sleep(1)
-                position2 = function_ark.pic_position(handle, config_ark.pic_confirm["zhandou_quickenter"], once=2)
+                position2 = function_ark.pic_position(self.handle, config_ark.pic_confirm["zhandou_quickenter"], once=2)
                 if position2!=None:
                     function_ark.mouse_click(self.handle, position2["result"])
                     time.sleep(2)
@@ -378,13 +379,133 @@ class Shark_Event:
             self.start_once()
             time.sleep(3)
 
+class Zhuxian:
+    def __init__(self,handle,**kwarg):
+        self.handle = handle
+        self.num = kwarg['num']
+        self.guanqia = kwarg['guanqia']
+        self.operation_sequence = [   #前面仍有相关步骤，先做简易版 2019-6-3
+            "进入战斗界面",
+            "选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面",
+            "确认使用代理并开始战斗",     #若代理确认成功说明在队伍配置界面
+            "确认进入战斗,确认没有暂停并等待战斗结束",    #confirm   zhandou start隔一段时间检测一次
+            "判断战役成功",  #目前没有失败素材，没有做
+        ]
+        self.operation_mapping = {}
+        for i in range(len(self.operation_sequence)):
+            self.operation_mapping[self.operation_sequence[i]] = i
+
+    def find_where(self):
+        #重新定位当前位置,根据不同位置决定开始执行哪一步操作
+        position = function_ark.judge_where(self.handle,10)
+        if position == "gonggao" or position == "zhujiemian":
+            return self.operation_mapping["进入战斗界面"]
+        elif position == "zhandou_xuanze":
+            return self.operation_mapping["选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
+        elif position == "zhandou_start":
+            return self.operation_mapping["确认使用代理并开始战斗"]
+        elif position == "zhandou_ing":
+            return self.operation_mapping["确认进入战斗,确认没有暂停并等待战斗结束"]
+        elif position == "zhandou_end":
+            return self.operation_mapping["判断战役成功"]
+        elif position == "yuanshi_lizhi":
+            if config_ark.YUANSHI > globalvar.get_yuanshi_used():
+                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_ok"])
+                globalvar.yuanshi_used_add(1)
+            else:
+                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_no"])
+                print("石乐志，结束")
+                raise config_ark.ExitError
+            time.sleep(1)
+
+        else:
+            position1 = function_ark.pic_position(self.handle, config_ark.pic_where["enter_quick"], once=2)
+            if position1 ==None:
+                function_ark.save_im(self.handle,os.path.join(config_ark.IMG_SAVE,'error_{}.png'.format(
+                        time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))))
+                function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+            else:
+                #若可以快速访问，则直接跳转到战斗主界面
+                function_ark.mouse_click(self.handle,position1["result"])
+                time.sleep(1)
+                position2 = function_ark.pic_position(self.handle, config_ark.pic_confirm["zhandou_quickenter"], once=2)
+                if position2!=None:
+                    function_ark.mouse_click(self.handle, position2["result"])
+                    time.sleep(2)
+                    return self.operation_mapping["选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
+                else:
+                    #再次判断位置
+                    pass
+        return self.find_where()
+
+    def start_once(self):
+        i = 0
+        while(i<len(self.operation_sequence)):
+            if function_ark.confirm_where(self.handle,config_ark.guanqia_pic[self.guanqia]):
+                function_ark.enter_zhuxian(self.handle,self.guanqia)
+                i = self.operation_mapping["确认使用代理并开始战斗"]
+            else:
+                i = self.find_where()
+            print("now {}".format(self.operation_sequence[i]))
+            if self.operation_sequence[i]=="进入战斗界面":
+                function_ark.enter_where(self.handle,"zhandou_xuanze")
+                #i += 1
+            elif self.operation_sequence[i]=="选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面":
+                function_ark.enter_chapter(self.handle, self.guanqia)
+                function_ark.enter_zhuxian(self.handle, self.guanqia,daili_confirm=True)
+            elif self.operation_sequence[i]=="确认使用代理并开始战斗":
+                if function_ark.confirm_where(self.handle,config_ark.pic_where['zhandou_start'],confirm_once=4):
+                    if function_ark.confirm_where(self.handle,config_ark.pic_confirm["daili_confirm"]):
+                        function_ark.mouse_click(self.handle,config_ark.points["zhandou_start"])
+                        time.sleep(3)
+                        #i += 1
+                    else:
+                        raise config_ark.ExitError
+                else:
+                    #上一步操作点击被吞了
+                    #i = self.operation_mapping["进入队伍配置界面"]
+                    pass
+            elif self.operation_sequence[i]=="确认进入战斗,确认没有暂停并等待战斗结束":
+                if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_ing"],confirm_once=20):
+                    i += 1
+                else:
+                    #从新定位当前位置
+                    continue
+                while(1):
+                    if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_ing"],confirm_once=2):
+                        print("正在战斗中")
+                        position = function_ark.pic_position(self.handle,config_ark.pic_confirm["zhandou_pause"],once=True)
+                        if position!=None:
+                            function_ark.mouse_click(self.handle,position["result"])
+                            print("检测到暂停，继续战斗")
+                        time.sleep(config_ark.BATTLE_WAIT)
+                    else:
+                        #结束
+                        #i += 1
+                        break
+            elif self.operation_sequence[i]=="判断战役成功":
+                if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_end"],confirm_once=10):
+                    function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+                    i += 1
+                else:
+                    #从新定位当前位置
+                    #判断是否代理未满3星
+                    #self.find_where()
+                    pass
+
+    def start(self):
+        for i in range(self.num):
+            self.start_once()
+            time.sleep(3)
 if __name__ == "__main__":
     temp = ["GT2","GT3","GT4","GT5","GT6"]              #支持的关卡
 
     handle = get_handle([1280,720])                         #获取模拟器窗体句柄
     pic_load_ram()                                          #将配置文件中的图像载入内存
-    temp_class = Shark_Event(handle,num=20,guanqia=temp[3])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
-    temp_class.start()
+    temp_class1 = Zhuxian(handle,num=2,guanqia="SK-5")
+    temp_class1.start_once()
+    # temp_class = Shark_Event(handle,num=20,guanqia=temp[3])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
+    # temp_class.start()
 
     # handle = get_handle([1280, 720])
     # position = function_ark.pic_position(handle,config_ark.pic_where['zhandou_end'])
