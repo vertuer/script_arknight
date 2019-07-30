@@ -4,8 +4,8 @@
 </p>
 
 ## 1.简介
-  [EXE文件网盘链接7-13](https://pan.baidu.com/s/1nJ_TClPSf_Enu78tcthpjg)  
-  提取码：xukl   
+  [EXE文件网盘链接7-13](https://pan.baidu.com/s/11YevZD_Z-C9vGxk4H9C2VQ)  
+  提取码：zxo1   
   自己写的针对windows模拟器（支持夜神模拟器及mumu（需管理员模式打开））的游戏脚本，现在能自动肝活动本及常见本和刷主线1-11免理智过日常任务，使用请注册github打个star，可以使用源码二次开发，源码使用请fork，欢迎留言交流。
 
 明日方舟调用库：  
