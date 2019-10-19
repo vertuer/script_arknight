@@ -6,7 +6,7 @@
 ## 1.简介
   [EXE文件网盘链接9-22](https://pan.baidu.com/s/1KPlV1n71NOauuSAo0id1sA)  
   提取码：wowe  
-  [EXE文件网盘链接10-19](https://pan.baidu.com/s/1-NCIGFYNUM-swkeww9UJGg&shfl=sharepset)
+  [EXE文件网盘链接10-19](https://pan.baidu.com/s/1-NCIGFYNUM-swkeww9UJGg&shfl=sharepset)  
   提取码：97no  
   自己写的针对windows模拟器（支持夜神模拟器及mumu（需管理员模式打开））的游戏脚本，现在能自动肝活动本及常见本和刷主线1-11免理智过日常任务，使用请注册github打个star，可以使用源码二次开发，源码使用请fork，欢迎留言交流。  
   目前正在增加可以自动根据需求去刷固定数量的材料及掉落统计功能及用户自己添加要刷的关卡，完成时间看心情=。=
@@ -22,7 +22,7 @@ PIL，pywin32-223，opencv-3.4.3
   利用抓取windows窗口图像，并对图像进行基本识别操作后对模拟器窗口发送虚拟操作指令，由于是在模拟器之外的，因此原理上不会有风险。
 缺点是模拟器无法最小化，因windows程序最小化停止重绘窗口，无法抓取到窗体图像。推荐spy++这个工具，可以获取模拟器的句柄和窗体信息，[spy++下载地址](http://pan.baidu.com/s/1skMJUkH)
 
-## 3.脚本功能（针对2019-9-3版本）
+## 3.脚本功能（针对2019-10-19版本）
   1. 所有关卡可以自行添加，添加方式详细见说明文件    
   2. 理智不足可以碎石    （config_ark.py 配置）  
   3. 脚本开始位置无要求，可以从不同界面，或者是战斗中等开始脚本  
