@@ -2,12 +2,13 @@ from  basic_function import *
 import time
 import os
 import config_ark
+import globalvar
 # time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
 def judge_where(handle,count_max=60):
     #判断当前位置
     def _judge(im):
         for keys,pic_data in config_ark.pic_where.items():
-            if pic_locate(pic_data, im, config_ark.THRESH_PIC,False,True) != None:
+            if pic_locate(pic_data, im, globalvar.get_thresh_pic(),False,True) != None:
                 current_pos = keys
                 return current_pos
         return None
@@ -36,7 +37,7 @@ def judge_where(handle,count_max=60):
 def confirm_where(handle,pic_data,rgb_bool = True,confirm_once=True):
     #验证当前是否处于某位置
     def _judge(im):
-        if pic_locate(pic_data, im, config_ark.THRESH_PIC, rgb_bool= rgb_bool,findall=False) != None:
+        if pic_locate(pic_data, im, globalvar.get_thresh_pic(), rgb_bool= rgb_bool,findall=False) != None:
             return True
         else:
             return False
@@ -69,8 +70,10 @@ def confirm_where(handle,pic_data,rgb_bool = True,confirm_once=True):
 
     return exist
 
-def pic_position(handle,pic_data,thresh=config_ark.THRESH_PIC,findall=False,once=False):
+def pic_position(handle,pic_data,thresh=None,findall=False,once=False):
     #寻找图像位于模拟器的像素位置，左上为（0，0）
+    if thresh==None:
+        thresh = globalvar.get_thresh_pic()
     count = 0
     if once != False and once != True:
         count_max = once
@@ -123,78 +126,98 @@ def enter_where(handle,where):
     return False
 
 def enter_chapter(handle,where):
-    #从战斗进入主线
-    #where为主线章节,如 "1-11"
-    temp = where.split("-")[0]
-    if temp in ["LS","AP","SK","CE"]:
-        temp_str = 'wuzichoubei'
-        sub_class = temp
-    elif temp[-1] in ["1","2","3","4"]:
-        temp_str = "zhuxian"
-        sub_class = "chapter{}".format(temp[-1])
-    elif temp in ["PR"]:
-        temp_str = "xinpiansousuo"
-        sub_class = temp
+    #从战斗进入主线,物资，活动关卡等
+    #where为关卡完整信息,如 "ZX-1-1-11"
+    tmp = where.split('|')
+    sub_class = tmp[0] + "|" + tmp[1]
+    chapter = tmp[0]
+    if chapter in ['ZX','PR','WZ']:
+        confirm_pic = config_ark.guanqia_pic[chapter]
+        sub_class_pic = config_ark.guanqia_pic[sub_class]
+    elif chapter is 'HD':
+        confirm_pic = config_ark.pic_huodong[chapter]
+        sub_class_pic = config_ark.pic_huodong[sub_class]
     else:
         #实际上不可能出现
         temp_str = None
-        sub_class = temp
         raise Exception
-    position = pic_position(handle,config_ark.pic_confirm[temp_str],once=True)
+    #进入一级章节
+    position = pic_position(handle,confirm_pic,once=True)
     if position!=None:
         mouse_click(handle,position["result"])
         time.sleep(1)
     else:
         return False
     cnt=0
+    #进入子章节
     while (1):
-        position = pic_position(handle, config_ark.pic_confirm[sub_class],once=1)
+        position = pic_position(handle, sub_class_pic,once=1)
         if position!=None:
             break
-        mouse_drag(handle, config_ark.points['drag_left'], config_ark.DRAG_SPEED)
+        mouse_drag(handle, config_ark.points['drag_left'], globalvar.get_drag_speed())
         cnt += 1
         if cnt > 10:
             print("主线进入失败，重新进入战斗界面")
             return False
 
     mouse_click(handle,position["result"])
-    print("进入{}".format(temp_str))
+    print("进入{}".format(sub_class))
     return True
-def enter_zhuxian(handle,where,daili_confirm=False):
+
+def enter_zhuxian(handle,where,daili_confirm=True):
+    """
+    :param handle:
+    :param where: exp 'ZX|1|1-11' 'HD|1|xx-xx'
+    :param daili_confirm:
+    :return:
+    """
     #从章节进入主线
     #开始拖拽至最最右侧
     #先判定是否有选择的关卡
-    position = pic_position(handle, config_ark.guanqia_pic[where], once=2)
-    if position == None:
+    chapter = where.split('|')[0]
+    if chapter == 'HD':
+        tmp1 = config_ark.pic_huodong[where]
+        tmp2 = config_ark.pic_huodong[where+'_confirm']
+    else:
+        tmp1 = config_ark.guanqia_pic[where]
+        tmp2 = config_ark.guanqia_pic[where+'_confirm']
+    position = pic_position(handle, tmp1,once=True)
+    if position==None:
+        position = pic_position(handle,tmp2,once=True)
+    if position==None:
+        print('当前界面未检测到选择关卡，划至最右侧寻找')
         for i in range(20):
             mouse_drag(handle, config_ark.points['drag_right'], 3)
-    cnt = 0
-    while (1):
-        position = pic_position(handle, config_ark.guanqia_pic[where],once=1)
-        if position != None:
-            break
-        mouse_drag(handle, config_ark.points['drag_left'], config_ark.DRAG_SPEED)
-        cnt += 1
-        if cnt > 20:
-            print("主线进入失败，重新进入战斗界面")
-            return False
-    mouse_click(handle, position["result"])
-    print("选择关卡")
-    if confirm_where(handle, config_ark.guanqia_pic["{}_confirm".format(where)], confirm_once=2):
-        if daili_confirm==True:
-            position = pic_position(handle, config_ark.pic_confirm["daili_do"], once=True)
+        cnt = 0
+        while (1):
+            position = pic_position(handle, tmp1,once=1)
             if position != None:
-                print("代理已使用")
-                # i += 1
-                pass
-            else:
-                mouse_click(handle, config_ark.points['daili'])
-                time.sleep(1)
-                print("使用代理")
-        mouse_click(handle, config_ark.points["peizhi_enter"])
-        print("进入队伍配置界面")
+                break
+            mouse_drag(handle, config_ark.points['drag_left'], globalvar.get_drag_speed())
+            cnt += 1
+            if cnt > 20:
+                print("主线进入失败，重新进入战斗界面")
+                return False
+    mouse_click(handle, position["result"])
+    time.sleep(1)
+    print("选择关卡")
+    #if confirm_where(handle, config_ark.guanqia_pic["{}_confirm".format(where)], confirm_once=2):
+    if daili_confirm==True:
+        position = pic_position(handle, config_ark.pic_confirm["daili_do"], once=True)
+        if position != None:
+            print("代理已使用")
+            # i += 1
+            pass
+        else:
+            mouse_click(handle, config_ark.points['daili'])
+            time.sleep(1)
+            print("使用代理")
     else:
         return False
+    mouse_click(handle, config_ark.points["peizhi_enter"])
+    print("进入队伍配置界面")
+    #else:
+        #return False
     time.sleep(3)
     return True
 
@@ -203,16 +226,16 @@ def set_direction(handle,xy,direction):
     #direction left ,right up down
     if direction == "left":
         temp_xy = [xy[0]-config_ark.BUSHU_OFFSET,xy[1]]
-        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+        mouse_drag(handle,(xy,temp_xy),globalvar.get_drag_speed())
     elif direction == "right":
         temp_xy = [xy[0]+config_ark.BUSHU_OFFSET,xy[1]]
-        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+        mouse_drag(handle,(xy,temp_xy),globalvar.get_drag_speed())
     elif direction == "up":
         temp_xy = [xy[0],xy[1]-config_ark.BUSHU_OFFSET]
-        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+        mouse_drag(handle,(xy,temp_xy),globalvar.get_drag_speed())
     elif direction == "down":
         temp_xy = [xy[0],xy[1]-config_ark.BUSHU_OFFSET]
-        mouse_drag(handle,(xy,temp_xy),config_ark.DRAG_SPEED)
+        mouse_drag(handle,(xy,temp_xy),globalvar.get_drag_speed())
 
 def battle_speed_set(handle,speed=2):
     if speed ==2:
@@ -243,11 +266,12 @@ def staff_set(handle,name_or_xy,target_xy,direction):
         i = 0
         while(i<30):
             i += 1
-            position = pic_position(handle,staff_pic,config_ark.THRESH_PIC,once=True)
+            position = pic_position(handle,staff_pic,globalvar.get_thresh_pic(),once=True)
             if position!=None:
-                mouse_drag(handle,(position["result"],target_xy),config_ark.DRAG_SPEED)
+                mouse_drag(handle,(position["result"],target_xy),globalvar.get_drag_speed())
                 time.sleep(1)
-                if confirm_where(handle,config_ark.pic_confirm["bushu_fangxiang"]):
+
+                if pic_position(handle,config_ark.pic_confirm["bushu_fangxiang"],thresh=globalvar.get_thresh_pic()-0.1,once=True)!=None:
                     set_direction(handle,target_xy,direction)
                     time.sleep(2)
                     return True

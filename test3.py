@@ -1,5 +1,3 @@
-import numpy as np
-from PIL import Image
 import os
 import time
 import config_ark
@@ -9,67 +7,11 @@ import config_ark
 from basic_function import pic_locate,prtsc,get_handle,mouse_scroll
 import function_ark
 import globalvar
-def pic_load_ram():
-    #must run get handle first
-    window_resolution = globalvar.get_window_resolution()
-    max_resolution = globalvar.get_max_resolution()
-    if window_resolution[0]==0:
-        raise Exception("未检测到模拟器")
-    for keys,pic_path in config_ark.pic_confirm.items():
-        temp_im = Image.open(pic_path)
-        temp_im = temp_im.convert("RGB")
-        width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
-        height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
-        temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
-        config_ark.pic_confirm[keys] = np.array(temp_im)
-
-    for keys, pic_path in config_ark.pic_huodong.items():
-        temp_im = Image.open(pic_path)
-        temp_im = temp_im.convert("RGB")
-        width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
-        height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
-        temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
-        config_ark.pic_huodong[keys] = np.array(temp_im)
-
-    for keys, pic_path in config_ark.pic_where.items():
-        temp_im = Image.open(pic_path)
-        temp_im = temp_im.convert("RGB")
-        width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
-        height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
-        temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
-        config_ark.pic_where[keys] = np.array(temp_im)
-
-    for keys, pic_path in config_ark.staff_pic.items():
-        temp_im = Image.open(pic_path)
-        temp_im = temp_im.convert("RGB")
-        width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
-        height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
-        temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
-        config_ark.staff_pic[keys] = np.array(temp_im)
-
-    for keys, pic_path in config_ark.guanqia_pic.items():
-        temp_im = Image.open(pic_path)
-        temp_im = temp_im.convert("RGB")
-        width = int(window_resolution[0] / max_resolution[0] * temp_im.size[0])
-        height = int(window_resolution[1] / max_resolution[1] * temp_im.size[1])
-        temp_im = temp_im.resize((width, height), Image.ANTIALIAS)
-        config_ark.guanqia_pic[keys] = np.array(temp_im)
-    #常量点 自定义分辨率适应
-    for keys,values in config_ark.points.items():
-        if isinstance(values[0],int):
-            width = int(window_resolution[0] / max_resolution[0] * values[0])
-            height = int(window_resolution[1] / max_resolution[1] * values[1])
-            config_ark.points[keys] = [width, height]
-        else:
-            for index,value_temp in enumerate(values):
-                width = int(window_resolution[0] / max_resolution[0] * value_temp[0])
-                height = int(window_resolution[1] / max_resolution[1] * value_temp[1])
-                values[index] = [width, height]
-            config_ark.points[keys] = values
 class zx_1_11:
     def __init__(self,handle,num):
         self.handle = handle
         self.num = num
+        self.chapter = '1'
         self.guanqia = "1-11"
         self.operation_sequence = [
             "进入战斗界面",
@@ -95,7 +37,7 @@ class zx_1_11:
         elif position == "zhandou_end":
             return self.operation_mapping["判断战役成功"]
         elif position == "yuanshi_lizhi":
-            if config_ark.YUANSHI > globalvar.get_yuanshi_used():
+            if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
                 function_ark.mouse_click(self.handle,config_ark.points["yuanshi_ok"])
                 globalvar.yuanshi_used_add(1)
             else:
@@ -196,7 +138,14 @@ class zx_1_11:
                         #i += 1
             elif self.operation_sequence[i] == "判断战役成功":
                 if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_end"],confirm_once=2):
+                    print("战斗胜利")
                     function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+                    temp_list = list(config_ark.pic_where.keys())
+                    temp_list.remove('zhandou_end')
+                    temp_list.remove('zhandou_failed')
+                    if function_ark.judge_where(self.handle,5) in config_ark.pic_where.keys():
+                        print('返回到上一级')
+                        pass
                     return True
                 else:
                     function_ark.confirm_where(self.handle, config_ark.pic_where["zhandou_failed"], confirm_once=2)
@@ -237,7 +186,7 @@ class Shark_Event:
         position = function_ark.judge_where(self.handle,10)
         if position == "gonggao" or position == "zhujiemian":
             return self.operation_mapping["进入战斗界面"]
-        elif position == "zhandou_xuanze" or position == "huodongjiemian":
+        elif position == "zhandou_xuanze":
             return self.operation_mapping["选择并进入活动界面"]
         elif position == "huodong_xuanze":
             return self.operation_mapping["选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
@@ -248,15 +197,38 @@ class Shark_Event:
         elif position == "zhandou_end":
             return self.operation_mapping["判断战役成功"]
         elif position == "yuanshi_lizhi":
-            if config_ark.YUANSHI > globalvar.get_yuanshi_used():
-                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_ok"])
+            """
+            verified 2019-9-2
+            增加体力药选项
+            """
+            # verified 2019-9-2
+            # if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
+            #     function_ark.mouse_click(self.handle,config_ark.points["yuanshi_ok"])
+            #     globalvar.yuanshi_used_add(1)
+            # else:
+            #     function_ark.mouse_click(self.handle,config_ark.points["yuanshi_no"])
+            #     print("石乐志，结束")
+            #     raise config_ark.ExitError
+            # time.sleep(1)
+            if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
+                if function_ark.confirm_where(self.handle,config_ark.pic_confirm['60tili']):
+                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+                    print('使用60体力药')
+                    time.sleep(1)
+                elif function_ark.confirm_where(self.handle,config_ark.pic_confirm['100tili']):
+                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+                    print('使用100体力药')
+                    time.sleep(1)
+                else:
+                    function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+                    print('没有体力药或者是别的情况,总之还是石乐志')
+                    raise config_ark.ExitError
                 globalvar.yuanshi_used_add(1)
             else:
-                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_no"])
+                function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
                 print("石乐志，结束")
                 raise config_ark.ExitError
             time.sleep(1)
-
         else:
             position1 = function_ark.pic_position(self.handle, config_ark.pic_where["enter_quick"], once=2)
             if position1 ==None:
@@ -280,16 +252,31 @@ class Shark_Event:
     def start_once(self):
         i = 0
         while(i<len(self.operation_sequence)):
-            i = self.find_where()
+            for j in range(2):
+                whether_enter = function_ark.confirm_where(self.handle, config_ark.pic_huodong[self.guanqia]) or \
+                function_ark.confirm_where(self.handle, config_ark.pic_huodong[self.guanqia + '_confirm'])
+                if whether_enter:
+                    break
+            if whether_enter:
+                function_ark.enter_zhuxian(self.handle,self.guanqia,daili_confirm=True)
+                i = self.operation_mapping["确认使用代理并开始战斗"]
+            else:
+                i = self.find_where()
+
             print("now {}".format(self.operation_sequence[i]))
             if self.operation_sequence[i]=="进入战斗界面":
                 function_ark.enter_where(self.handle,"zhandou_xuanze")
                 #i += 1
             elif self.operation_sequence[i]=="选择并进入活动界面":
-                position = function_ark.pic_position(self.handle,config_ark.pic_huodong["huodong_enter"],once=3)
+                tmp = self.guanqia.split('-')[-1]
+                if len(tmp)==1:
+                    tmp = 'huodong_enter1'
+                else:
+                    tmp = 'huodong_enter2'
+                position = function_ark.pic_position(self.handle,config_ark.pic_huodong['huodong'],once=3)
                 if position!=None:
                     function_ark.mouse_click(self.handle,position["result"])
-                    position1 = function_ark.pic_position(self.handle, config_ark.pic_where["huodongjiemian"], once=3)
+                    position1 = function_ark.pic_position(self.handle, config_ark.pic_huodong[tmp], once=3)
                     if position1 != None:
                         function_ark.mouse_click(self.handle, position1["result"])
                     else:
@@ -301,38 +288,44 @@ class Shark_Event:
             elif self.operation_sequence[i]=="选择关卡,确认选择正确,使用代理,进入队伍配置界面":
                 function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
                 time.sleep(1)
-                current_position = function_ark.pic_position(self.handle,config_ark.pic_huodong[self.guanqia],once=4)
-                if current_position==None:
-                    print("当前非选择关卡")
-                    continue
-                function_ark.mouse_click(self.handle,current_position["result"])
-                time.sleep(1)
+                function_ark.enter_zhuxian(self.handle,self.guanqia)
+                """
+              verified at 2019-9-2
+              删除原有逻辑，增加全局搜索关卡功能
+              """
+                #verified at 2019-9-2
+                # current_position = function_ark.pic_position(self.handle,config_ark.pic_huodong[self.guanqia],once=4)
+                # if current_position==None:
+                #     print("当前非选择关卡")
+                #     continue
+                # function_ark.mouse_click(self.handle,current_position["result"])
+                # time.sleep(1)
                 #i += 1
                 #确认选择正确
-                if function_ark.confirm_where(self.handle,config_ark.pic_confirm[self.guanqia],confirm_once=True):
-                    print("关卡信息正确")
-                    pass
-                    #i += 1
-                else:
-                    continue
-                    #没有选择正确的关卡，重新进入‘选择关卡’
-                    #i = self.operation_mapping["选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
-                    pass
-                #使用代理
-                position = function_ark.pic_position(self.handle,config_ark.pic_confirm["daili_do"],once=True)
-                if position != None:
-                    print("代理已使用")
-                    #i += 1
-                    pass
-                else:
-                    function_ark.mouse_click(self.handle,config_ark.points['daili'])
-                    print("使用代理")
-                    #i += 1
-                #进入队伍配置界面
-                time.sleep(1)
-                function_ark.mouse_click(self.handle,config_ark.points["peizhi_enter"])
-                print("进入队伍配置界面")
-                time.sleep(3)
+                # if function_ark.confirm_where(self.handle,config_ark.pic_confirm[self.guanqia],confirm_once=True):
+                #     print("关卡信息正确")
+                #     pass
+                #     #i += 1
+                # else:
+                #     continue
+                #     #没有选择正确的关卡，重新进入‘选择关卡’
+                #     #i = self.operation_mapping["选择关卡,确认选择正确,使用代理,进入队伍配置界面"]
+                #     pass
+                # #使用代理
+                # position = function_ark.pic_position(self.handle,config_ark.pic_confirm["daili_do"],once=True)
+                # if position != None:
+                #     print("代理已使用")
+                #     #i += 1
+                #     pass
+                # else:
+                #     function_ark.mouse_click(self.handle,config_ark.points['daili'])
+                #     print("使用代理")
+                #     #i += 1
+                # #进入队伍配置界面
+                # time.sleep(1)
+                # function_ark.mouse_click(self.handle,config_ark.points["peizhi_enter"])
+                # print("进入队伍配置界面")
+                # time.sleep(3)
                 #i += 1
             elif self.operation_sequence[i]=="确认使用代理并开始战斗":
                 if function_ark.confirm_where(self.handle,config_ark.pic_where['zhandou_start'],confirm_once=4):
@@ -380,10 +373,12 @@ class Shark_Event:
             time.sleep(3)
 
 class Zhuxian:
-    def __init__(self,handle,**kwarg):
+    def __init__(self,handle,confirm=True,**kwarg):
         self.handle = handle
         self.num = kwarg['num']
-        self.guanqia = kwarg['guanqia']
+        self.confirm = confirm
+        #self.chapter = kwarg['chapter']  # 1   2    3  AP   HD
+        self.guanqia = kwarg['guanqia']   # HD|HD-1|OP-4
         self.operation_sequence = [   #前面仍有相关步骤，先做简易版 2019-6-3
             "进入战斗界面",
             "选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面",
@@ -409,11 +404,23 @@ class Zhuxian:
         elif position == "zhandou_end":
             return self.operation_mapping["判断战役成功"]
         elif position == "yuanshi_lizhi":
-            if config_ark.YUANSHI > globalvar.get_yuanshi_used():
-                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_ok"])
+            if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
+                #逻辑需要优化，遇到网络波动时，会出现吃了药却石乐志了情况
+                if function_ark.confirm_where(self.handle,config_ark.pic_confirm['60tili']):
+                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+                    print('使用60体力药')
+                    time.sleep(1)
+                elif function_ark.confirm_where(self.handle,config_ark.pic_confirm['100tili']):
+                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+                    print('使用100体力药')
+                    time.sleep(1)
+                else:
+                    function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+                    print('没有体力药或者是别的情况,总之还是石乐志')
+                    raise config_ark.ExitError
                 globalvar.yuanshi_used_add(1)
             else:
-                function_ark.mouse_click(self.handle,config_ark.points["yuanshi_no"])
+                function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
                 print("石乐志，结束")
                 raise config_ark.ExitError
             time.sleep(1)
@@ -441,8 +448,13 @@ class Zhuxian:
     def start_once(self):
         i = 0
         while(i<len(self.operation_sequence)):
-            if function_ark.confirm_where(self.handle,config_ark.guanqia_pic[self.guanqia]):
-                function_ark.enter_zhuxian(self.handle,self.guanqia)
+            for j in range(2):
+                whether_enter = function_ark.confirm_where(self.handle, config_ark.guanqia_pic[self.guanqia]) or \
+                function_ark.confirm_where(self.handle, config_ark.guanqia_pic[self.guanqia + '_confirm'])
+                if whether_enter:
+                    break
+            if whether_enter:
+                function_ark.enter_zhuxian(self.handle,self.guanqia,daili_confirm=True)
                 i = self.operation_mapping["确认使用代理并开始战斗"]
             else:
                 i = self.find_where()
@@ -452,6 +464,7 @@ class Zhuxian:
                 #i += 1
             elif self.operation_sequence[i]=="选择并进入对应章节,选择关卡,确认选择正确,使用代理,进入队伍配置界面":
                 function_ark.enter_chapter(self.handle, self.guanqia)
+                time.sleep(1)
                 function_ark.enter_zhuxian(self.handle, self.guanqia,daili_confirm=True)
             elif self.operation_sequence[i]=="确认使用代理并开始战斗":
                 if function_ark.confirm_where(self.handle,config_ark.pic_where['zhandou_start'],confirm_once=4):
@@ -486,7 +499,14 @@ class Zhuxian:
             elif self.operation_sequence[i]=="判断战役成功":
                 if function_ark.confirm_where(self.handle,config_ark.pic_where["zhandou_end"],confirm_once=10):
                     function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
-                    i += 1
+                    temp_list = list(config_ark.pic_where.keys())
+                    temp_list.remove('zhandou_end')
+                    temp_list.remove('zhandou_failed')
+                    if function_ark.judge_where(self.handle,5) in config_ark.pic_where.keys():
+                        print('返回到上一级')
+                        return True
+                        pass
+
                 else:
                     #从新定位当前位置
                     #判断是否代理未满3星
@@ -502,6 +522,10 @@ if __name__ == "__main__":
 
     handle = get_handle([1280,720])                         #获取模拟器窗体句柄
     pic_load_ram()                                          #将配置文件中的图像载入内存
+    function_ark.confirm_where(handle, config_ark.guanqia_pic["CE-5_confirm"])
+    function_ark.confirm_where(handle,config_ark.guanqia_pic['1-7'])
+    temp_class = Zhuxian(handle, num=1, guanqia='1-7')
+    temp_class.start()
     temp_class1 = Zhuxian(handle,num=2,guanqia="SK-5")
     temp_class1.start_once()
     # temp_class = Shark_Event(handle,num=20,guanqia=temp[3])  #类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6

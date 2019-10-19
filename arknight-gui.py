@@ -13,9 +13,10 @@ import inspect
 import ctypes
 import sys
 import threading
-import time
 from test3 import *
 import wx.adv
+from config_ark import ChapterCTE,ChapterETC
+from add_gui import MyFrame1 as MyFrame2
 ###########################################################################
 ## Class MyFrame1
 ###########################################################################
@@ -34,7 +35,6 @@ def _async_raise(tid, exctype):
         raise SystemError("PyThreadState_SetAsyncExc failed")
     return 1
 
-
 def stop_thread(thread):
     return _async_raise(thread.ident, SystemExit)
 
@@ -49,228 +49,159 @@ class RedirectText(object):
 class RunThread(threading.Thread):
     def __init__(self,zhuxian_num,guanqia_infor,yuanshi_num,shuatu_num,thresh,handle):
         self.zhuxian_num = int(zhuxian_num)
+        #self.chapter = guanqia_infor[0]
         self.guanqia_infor = guanqia_infor
         self.shuatu_num = shuatu_num
         if yuanshi_num=="No！":
-            config_ark.YUANSHI = 0
+            globalvar.set_yuanshi(0)
         else:
-            config_ark.YUANSHI = int(yuanshi_num)
-        config_ark.THRESH_PIC = float(thresh)/100
+            globalvar.set_yuanshi(int(yuanshi_num))
+        globalvar.set_thresh_pic(float(thresh)/100)
         self.handle = handle
         threading.Thread.__init__(self)
     def run(self):
         #print("当前选择关卡{}".format())
-        if self.guanqia_infor in ["GT2","GT3","GT4","GT5","GT6"]:
-            temp_class = Shark_Event(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)  # 类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
-            temp_class.start()
-        else:
-            temp_class = Zhuxian(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)
-            temp_class.start()
-        temp_zhuxian = zx_1_11(self.handle,self.zhuxian_num)
-        temp_zhuxian.start()
+        temp_zhuxian = zx_1_11(self.handle, self.zhuxian_num)
+        signal = 0
+        try:
+            #verified at 2019-9-3
+            #verified at 2019-10-12
+            #改变关卡命名规则
+            chapter = self.guanqia_infor.split('|')[0]
+            if chapter in ['HD']:
+                temp_class = Shark_Event(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)  # 类实例化，num为刷本次数，guanqia为刷图类型，仅支持GT2-6
+                temp_class.start()
+            else:
+                temp_class = Zhuxian(self.handle, num=self.shuatu_num, guanqia=self.guanqia_infor)
+                temp_class.start()
+        except config_ark.ExitError:
+            temp_zhuxian.start()
+        except:
+            signal = 1
+
+        if signal==0:
+            temp_zhuxian.start()
         print("脚本运行完成")
 
 
 class MyFrame1(wx.Frame):
-
-    # def __init__(self, parent):
-    #
-    #
-    #     wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=wx.EmptyString, pos=wx.DefaultPosition,
-    #                       size=wx.Size(327, 456), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
-    #
-    #     self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
-    #
-    #     bSizer1 = wx.BoxSizer(wx.VERTICAL)
-    #
-    #     gSizer1 = wx.GridSizer(2, 2, 0, 0)
-    #
-    #     self.m_staticText1 = wx.StaticText(self, wx.ID_ANY, u"关卡选择", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     self.m_staticText1.Wrap(-1)
-    #     gSizer1.Add(self.m_staticText1, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-    #
-    #     self.m_staticText2 = wx.StaticText(self, wx.ID_ANY, u"碎石万岁", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     self.m_staticText2.Wrap(-1)
-    #     gSizer1.Add(self.m_staticText2, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-    #
-    #     event_choiseChoices = [u"GT2", u"GT3", u"GT4", u"GT5", u"GT6"]
-    #     self.event_choise = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, event_choiseChoices, 0)
-    #     self.event_choise.SetSelection(0)
-    #     gSizer1.Add(self.event_choise, 0, wx.ALL, 5)
-    #
-    #     yuanshi_choiceChoices = [u"No！", u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9", u"10"]
-    #     self.yuanshi_choice = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, yuanshi_choiceChoices, 0)
-    #     self.yuanshi_choice.SetSelection(0)
-    #     gSizer1.Add(self.yuanshi_choice, 0, wx.ALL, 5)
-    #
-    #     bSizer1.Add(gSizer1, 1, wx.EXPAND, 5)
-    #
-    #     gSizer4 = wx.GridSizer(2, 2, 0, 0)
-    #
-    #     self.num_label = wx.StaticText(self, wx.ID_ANY, u"刷图次数", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     self.num_label.Wrap(-1)
-    #     gSizer4.Add(self.num_label, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-    #
-    #     self.thresh_label = wx.StaticText(self, wx.ID_ANY, u"识图阈值", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     self.thresh_label.Wrap(-1)
-    #     gSizer4.Add(self.thresh_label, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-    #
-    #     self.num = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
-    #     self.num.SetMaxLength(0)
-    #     gSizer4.Add(self.num, 0, wx.ALL, 5)
-    #
-    #     self.thresh = wx.Slider(self, wx.ID_ANY, 80, 60, 100, wx.DefaultPosition, wx.DefaultSize,
-    #                             wx.SL_HORIZONTAL | wx.SL_LABELS)
-    #     gSizer4.Add(self.thresh, 0, wx.ALL, 5)
-    #
-    #     bSizer1.Add(gSizer4, 0, wx.EXPAND, 5)
-    #
-    #     gSizer3 = wx.GridSizer(1, 2, 0, 0)
-    #
-    #     self.start = wx.Button(self, wx.ID_ANY, u"开始", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     gSizer3.Add(self.start, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-    #
-    #     self.end = wx.Button(self, wx.ID_ANY, u"停止", wx.DefaultPosition, wx.DefaultSize, 0)
-    #     gSizer3.Add(self.end, 0, wx.ALL | wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, 5)
-    #
-    #     bSizer1.Add(gSizer3, 0, wx.EXPAND, 5)
-    #
-    #     bSizer6 = wx.BoxSizer(wx.VERTICAL)
-    #
-    #     self.infor = wx.TextCtrl(self, wx.ID_ANY, u"", wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE)
-    #     self.infor.SetMaxLength(0)
-    #     self.infor.Enable(False)
-    #     sys.stdout = RedirectText(self.infor)
-    #     self.infor.SetMinSize(wx.Size(-1, 80))
-    #     self.infor.SetMaxSize(wx.Size(-1, 400))
-    #
-    #     bSizer6.Add(self.infor, 0, wx.ALL | wx.EXPAND, 5)
-    #
-    #     self.m_hyperlink1 = wx.adv.HyperlinkCtrl(self, wx.ID_ANY, u"使用说明", u"https://github.com/vertuer/script_arknight",
-    #                                          wx.DefaultPosition, wx.DefaultSize, wx.adv.HL_DEFAULT_STYLE)
-    #     bSizer6.Add(self.m_hyperlink1, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
-    #
-    #     bSizer1.Add(bSizer6, 1, wx.EXPAND, 5)
-    #
-    #     self.SetSizer(bSizer1)
-    #     self.Layout()
-    #
-    #     # Connect Events
-    #     self.start.Bind(wx.EVT_BUTTON, self.ScriptBegin)
-    #     self.end.Bind(wx.EVT_BUTTON, self.ScriptEnd)
-    #
-    #     #初始化操作
-    #     handle = get_handle([1920, 1080])  # 获取模拟器窗体句柄
-    #     if handle == -1:
-    #         wx.MessageBox("未检测到夜神模拟器,请重新启动", "提示", wx.OK | wx.ICON_INFORMATION, parent=self)
-    #         wx.Exit()
-    #     self.handle = handle
-    #     pic_load_ram()  # 将配置文件中的图像载入内存
     def __init__(self, parent):
         wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=wx.EmptyString, pos=wx.DefaultPosition,
-                          size=wx.Size(327, 456), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+                          size=wx.Size(290, 430), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        self.SIZE1 = (100,30)
+
 
         self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
-        bSizer1 = wx.BoxSizer(wx.VERTICAL)
 
-        gSizer1 = wx.GridSizer(2, 2, 0, 0)
 
-        self.m_staticText1 = wx.StaticText(self, wx.ID_ANY, u"关卡选择", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.m_staticText1 = wx.StaticText(self, wx.ID_ANY, u"总章选择", (10,15), (100,25), 0)
         self.m_staticText1.Wrap(-1)
-        gSizer1.Add(self.m_staticText1, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
 
-        self.m_staticText2 = wx.StaticText(self, wx.ID_ANY, u"碎石万岁", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.m_staticText2 = wx.StaticText(self, wx.ID_ANY, u"子类选择", (100,15), (100,25), 0)
         self.m_staticText2.Wrap(-1)
-        gSizer1.Add(self.m_staticText2, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
 
-        event_choiseChoices = [u"GT2", u"GT3", u"GT4", u"GT5", u"GT6", u"CE-5", u"LS-5", u"SK-3", u"SK-5", u"AP-5", u"S2-12"]
-        self.event_choise = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, event_choiseChoices, 0)
+        self.m_staticText3 = wx.StaticText(self, wx.ID_ANY, u"关卡选择", (180,15),(100,25) , 0)
+        self.m_staticText3.Wrap(-1)
+
+
+        tmp1 = list(config_ark.guanqia_pic.keys())
+        tmp2 = list(config_ark.huodong_pic.keys())
+        tmp_guanqia = tmp1 + tmp2
+        index = 0
+        for i in range(len(tmp_guanqia)):
+            tmp_str = tmp_guanqia[index]
+            if "|" in tmp_str:
+                if "1-11" in tmp_str or "_confirm" in tmp_str:
+                    tmp_guanqia.remove(tmp_str)
+                    index -= 1
+            else:
+                tmp_guanqia.remove(tmp_str)
+                index -= 1
+            index += 1
+
+
+        self.guanqia_dict = {'主线':{},'物资筹备':{},'芯片获取':{},'活动':{}}
+        for i in tmp_guanqia:
+            tmp_split = i.split('|')
+            if len(tmp_split)!=3:
+                continue
+            total_class = tmp_split[0]
+            map_total_class = ChapterETC(total_class)
+            chapter = tmp_split[1]
+            name = tmp_split[2]
+            if chapter in self.guanqia_dict[map_total_class]:
+                self.guanqia_dict[map_total_class][chapter].append(name)
+            else:
+                self.guanqia_dict[map_total_class][chapter] = [name]
+
+            #self.guanqia_dict[self._ChapterETC(chapter)].append(name)
+
+        self.event_choise = wx.Choice(self, wx.ID_ANY, (5,40), (70,30), list(self.guanqia_dict.keys()), 0)
         self.event_choise.SetSelection(0)
-        gSizer1.Add(self.event_choise, 0, wx.ALL, 5)
+        self.event_choise.Bind(wx.EVT_CHOICE,self.Choice1Selected)
 
-        yuanshi_choiceChoices = [u"No！", u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9", u"10"]
-        self.yuanshi_choice = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, yuanshi_choiceChoices, 0)
-        self.yuanshi_choice.SetSelection(0)
-        gSizer1.Add(self.yuanshi_choice, 0, wx.ALL, 5)
+        choise2_dict = list(self.guanqia_dict[list(self.guanqia_dict.keys())[0]].keys())
+        self.event_choise2 = wx.Choice(self, wx.ID_ANY, (95,40), (70,30), choise2_dict, 0)
+        self.event_choise2.SetSelection(0)
+        self.event_choise2.Bind(wx.EVT_CHOICE,self.Choice2Selected)
 
-        bSizer1.Add(gSizer1, 1, wx.EXPAND, 5)
+        choise3_dict = self.guanqia_dict[list(self.guanqia_dict.keys())[0]][choise2_dict[0]]
+        self.event_choise3 = wx.Choice(self, wx.ID_ANY, (175,40), (70,30), choise3_dict, 0)
+        self.event_choise3.SetSelection(0)
+        #
+        self.m_staticText4 = wx.StaticText(self, wx.ID_ANY, u"理智万岁", (10,90), (100,25), 0)
+        self.m_staticText4.Wrap(-1)
 
-        gSizer4 = wx.GridSizer(3, 2, 0, 0)
-
-        self.num_label = wx.StaticText(self, wx.ID_ANY, u"刷图次数", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.num_label = wx.StaticText(self, wx.ID_ANY, u"刷图次数",(100,90), (100,25), 0)
         self.num_label.Wrap(-1)
-        gSizer4.Add(self.num_label, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
 
-        self.thresh_label = wx.StaticText(self, wx.ID_ANY, u"识图阈值", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.thresh_label = wx.StaticText(self, wx.ID_ANY, u"识图阈值", (185,90), (100,25), 0)
         self.thresh_label.Wrap(-1)
-        gSizer4.Add(self.thresh_label, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
+        #
+        yuanshi_choiceChoices = [u"No！", u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9", u"10"]
+        self.yuanshi_choice = wx.Choice(self, wx.ID_ANY, (5,120), (55,25), yuanshi_choiceChoices, 0)
+        self.yuanshi_choice.SetSelection(0)
 
-        self.num = wx.TextCtrl(self, wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.num = wx.TextCtrl(self, wx.ID_ANY, u"20", (100,120), (40,25), 0)
         self.num.SetMaxLength(0)
-        gSizer4.Add(self.num, 0, wx.ALL, 5)
 
-        self.thresh = wx.Slider(self, wx.ID_ANY, 80, 60, 100, wx.DefaultPosition, wx.DefaultSize,
+        self.thresh = wx.Slider(self, wx.ID_ANY, 85, 60, 100, (160,120), (100,25),
                                 wx.SL_HORIZONTAL | wx.SL_LABELS)
-        gSizer4.Add(self.thresh, 0, wx.ALL, 5)
 
-        bSizer3 = wx.BoxSizer(wx.VERTICAL)
-
-        self.label1 = wx.StaticText(self, wx.ID_ANY, u"关卡结束后1-11主线次数", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.label1 = wx.StaticText(self, wx.ID_ANY, u"关卡结束后1-11主线次数", (10,170), (100,25), 0)
         self.label1.Wrap(-1)
-        bSizer3.Add(self.label1, 0, wx.ALL, 5)
 
         zhuxian_numChoices = [u"0", u"1", u"2", u"3", u"4", u"5"]
-        self.zhuxian_num = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, zhuxian_numChoices, 0)
-        self.zhuxian_num.SetSelection(0)
-        bSizer3.Add(self.zhuxian_num, 0, wx.ALL, 5)
-
-        gSizer4.Add(bSizer3, 1, wx.EXPAND, 5)
-
-        bSizer4 = wx.BoxSizer(wx.VERTICAL)
-
-        self.drag_speed_label = wx.StaticText(self, wx.ID_ANY, u"拖拽速度", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.zhuxian_num = wx.Choice(self, wx.ID_ANY, (5,200), (40,25), zhuxian_numChoices, 0)
+        self.zhuxian_num.SetSelection(5)
+        #
+        #
+        #
+        self.drag_speed_label = wx.StaticText(self, wx.ID_ANY, u"拖拽速度", (185,170), (100,25), 0)
         self.drag_speed_label.Wrap(-1)
-        bSizer4.Add(self.drag_speed_label, 0, wx.ALL, 5)
 
-        self.drag_speed = wx.Slider(self, wx.ID_ANY, 20, 5, 30, wx.DefaultPosition, wx.DefaultSize,
+        self.drag_speed = wx.Slider(self, wx.ID_ANY, 20, 5, 30, (165,200), (100,25),
                                     wx.SL_HORIZONTAL | wx.SL_INVERSE)
-        bSizer4.Add(self.drag_speed, 0, wx.ALL, 5)
+        #
+        #
+        #
+        self.start = wx.Button(self, wx.ID_ANY, u"开始", (5,230), (90,35), 0)
+        self.end = wx.Button(self, wx.ID_ANY, u"停止", (170,230), (90,35), 0)
 
-        gSizer4.Add(bSizer4, 1, wx.EXPAND, 5)
-
-        bSizer1.Add(gSizer4, 0, wx.EXPAND, 5)
-
-        gSizer3 = wx.GridSizer(1, 2, 0, 0)
-
-        self.start = wx.Button(self, wx.ID_ANY, u"开始", wx.DefaultPosition, wx.DefaultSize, 0)
-        gSizer3.Add(self.start, 0, wx.ALL | wx.ALIGN_BOTTOM, 5)
-
-        self.end = wx.Button(self, wx.ID_ANY, u"停止", wx.DefaultPosition, wx.DefaultSize, 0)
-        gSizer3.Add(self.end, 0, wx.ALL | wx.ALIGN_BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, 5)
-
-        bSizer1.Add(gSizer3, 0, wx.EXPAND, 5)
-
-        bSizer6 = wx.BoxSizer(wx.VERTICAL)
-
-        self.infor = wx.TextCtrl(self, wx.ID_ANY, u"", wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE)
-        self.infor.SetMaxLength(0)
-        self.infor.Enable(False)
+        self.infor = wx.TextCtrl(self, wx.ID_ANY, u"", (5,270), (255,90), wx.TE_MULTILINE|wx.TE_READONLY)
+        self.infor.SetMaxLength(200)
+        #self.infor.Enable(False)
         self.infor.SetMinSize(wx.Size(-1, 80))
         self.infor.SetMaxSize(wx.Size(-1, 400))
         sys.stdout = RedirectText(self.infor)
-        bSizer6.Add(self.infor, 0, wx.ALL | wx.EXPAND, 5)
-
+        self.infor.Bind(wx.EVT_TEXT_MAXLEN,self.TextClear)
         self.m_hyperlink1 = wx.adv.HyperlinkCtrl(self, wx.ID_ANY, u"使用说明", u"https://github.com/vertuer/script_arknight",
-                                             wx.DefaultPosition, wx.DefaultSize, wx.adv.HL_DEFAULT_STYLE)
-        bSizer6.Add(self.m_hyperlink1, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
+                                                 (110,365), (50,30), wx.adv.HL_DEFAULT_STYLE)
 
-        bSizer1.Add(bSizer6, 1, wx.EXPAND, 5)
 
-        self.SetSizer(bSizer1)
-        self.Layout()
 
-        # Connect Events
+        #Connect Events
         self.start.Bind(wx.EVT_BUTTON, self.ScriptBegin)
         self.end.Bind(wx.EVT_BUTTON, self.ScriptEnd)
         #初始化操作
@@ -279,12 +210,28 @@ class MyFrame1(wx.Frame):
             wx.MessageBox("未检测到夜神模拟器,请重新启动", "提示", wx.OK | wx.ICON_INFORMATION, parent=self)
             wx.Exit()
         self.handle = handle
-        pic_load_ram()  # 将配置文件中的图像载入内存
     def __del__(self):
         pass
-
+    def TextClear(self,event):
+        self.infor.Clear()
+    def Choice1Selected(self,event):
+        #dealing when choice1 is selected
+        tmp_items = list(self.guanqia_dict[self.event_choise.GetStringSelection()].keys())
+        self.event_choise2.SetItems(tmp_items)
+        if tmp_items!=[]:
+            self.event_choise2.SetSelection(0)
+            self.event_choise3.SetItems(self.guanqia_dict[self.event_choise.GetStringSelection()][self.event_choise2.GetStringSelection()])
+            self.event_choise3.SetSelection(0)
+        else:
+            self.event_choise3.Clear()
+    def Choice2Selected(self,event):
+        #dealing when choice2 is selected
+        self.event_choise3.SetItems(self.guanqia_dict[self.event_choise.GetStringSelection()][self.event_choise2.GetStringSelection()])
+        self.event_choise3.SetSelection(0)
     # Virtual event handlers, overide them in your derived class
     def ScriptBegin(self, event):
+        def _get_full_name(total_class,chapter,name):
+            return ChapterCTE(total_class) + "|" + chapter + "|" + name
         if self.start.GetLabel()=="开始":
             try:
                 temp_num = int(self.num.GetValue())
@@ -292,13 +239,17 @@ class MyFrame1(wx.Frame):
                 wx.MessageBox("战斗次数请输入数字！！", "提示", wx.OK | wx.ICON_INFORMATION, parent=self)
                 self.num.Clear()
                 return
-            config_ark.DRAG_SPEED = int(self.drag_speed.GetValue())
+            globalvar.set_drag_speed(int(self.drag_speed.GetValue()))
             self.start.Enable(False)
             self.end.Enable(True)
             self.start.SetLabel("正在运行中")
-            t = RunThread(self.zhuxian_num.GetStringSelection(),self.event_choise.GetStringSelection(),self.yuanshi_choice.GetStringSelection(),temp_num,self.thresh.GetValue(),self.handle)
+            total_class = self.event_choise.GetStringSelection() #'主线'
+            chapter = self.event_choise2.GetStringSelection()  # '第一章'
+            name = self.event_choise3.GetStringSelection()   #"1-7'
+            t = RunThread(self.zhuxian_num.GetStringSelection(),_get_full_name(total_class,chapter,name),self.yuanshi_choice.GetStringSelection(),temp_num,self.thresh.GetValue(),self.handle)
             self.thread_id = t
-            self.event_choise.GetCurrentSelection()
+            #self.event_choise.GetCurrentSelection()
+            #t.run() #only for test
             t.start()
             self.end.Enable(True)
             #self.start.SetLabel("开始")
@@ -313,22 +264,52 @@ class MyFrame1(wx.Frame):
         self.end.Enable(False)
         self.start.SetLabel("开始")
 
+
+class SubclassDialog(wx.Dialog):
+    def __init__(self):
+        wx.Dialog.__init__(self, None, -1, '请选择脚本功能',
+                           size=(300, 100))
+        okButton = wx.Button(self, wx.ID_OK, "脚本挂机", pos=(15, 15))
+        okButton.SetDefault()
+        cancelButton = wx.Button(self, wx.ID_CANCEL, "脚本关卡管理",
+                                 pos=(115, 15))
+
 class Myapp(wx.App):
     def __init__(self):
-        self.qwe = 123
+        #self.qwe = 123
         wx.App.__init__(self,redirect=False)
 
+    def OnClose(self,event):
+        self.ExitMainLoop()
 
     def OnInit(self):
-        print(self.qwe)
-        self.frame = MyFrame1(parent=None)
-        self.frame.Show()
-        self.SetTopWindow(self.frame)
+        #print(self.qwe)
+        self.frame1 = MyFrame1(parent=None)
+        self.frame2 = MyFrame2(parent=None)
+        self.frame1.Bind(wx.EVT_CLOSE,self.OnClose)
+        self.frame2.Bind(wx.EVT_CLOSE,self.OnClose)
+        dialog = SubclassDialog()
+        result = dialog.ShowModal()
+        #dialog.Bind(wx.EVT_CLOSE,self.OnClose)
+        dialog.Destroy()
+        if result == wx.ID_OK:
+            config_ark.pic_load_ram()  # 将配置文件中的图像载入内存
+            #self.SetTopWindow(self.frame1)
+            self.frame1.Show()
+
+        elif result == wx.ID_CANCEL:
+            #self.SetTopWindow(self.frame2)
+            self.frame2.Show()
+
+
+
+        #self.SetTopWindow(self.frame1)
         return True
 if __name__ == "__main__":
     #just for test
     app = Myapp()
     app.MainLoop()
+    #app.OnExit()
     # handle = function_ark.get_handle()
     # pic_load_ram()
     # temp = zx_1_11(handle,2)

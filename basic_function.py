@@ -5,8 +5,8 @@ import numpy as np
 import aircv
 # import skimage.io as io
 # import re
-#import pyocr
 import globalvar
+# import pyocr
 # def ocr(im,mode='time'): #input PIL image
 #     #ocr识别
 #     im = Image.fromarray(im)
@@ -16,6 +16,7 @@ import globalvar
 #     if mode =='time':
 #         a = re.sub('\D','',a)
 #     return a
+
 
 def pic_locate(pic_match,pic_origin,thresh,findall=True,rgb_bool=True):  #pic_match is the dir path, pic_origin is the data array
     """
@@ -151,20 +152,22 @@ def save_im(handle,file_name):
 
 def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
     handlelist = []
+    handle_infor = globalvar.get_handle_infor()
     win32gui.EnumWindows(lambda hWnd, param: param.append([hWnd,
                                                            win32gui.GetClassName(hWnd),
                                                            win32gui.GetWindowText(hWnd)])
                          , handlelist)
-    win = win32gui.FindWindow(None, '夜神模拟器')
+    win = win32gui.FindWindow(None, handle_infor[0])
     if win==0:
-        win = win32gui.FindWindow(None, 'MuMu模拟器')
+        win = win32gui.FindWindow(None, handle_infor[2])
         hWndChildList = []
         win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
                                                                             , win32gui.GetClassName(hWnd)
                                                                             , win32gui.GetWindowText(hWnd)])
-        if win32gui.GetWindowText(hWnd) in ['NemuPlayer']  else None, hWndChildList)
+        if win32gui.GetWindowText(hWnd) in [handle_infor[3]]  else None, hWndChildList)
         try:
             win = hWndChildList[0][0]
+            print("当前为mumu模拟器")
         except:
             return -1
 
@@ -173,18 +176,21 @@ def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
         win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
                                                                             , win32gui.GetClassName(hWnd)
                                                                             , win32gui.GetWindowText(hWnd)])
-        if win32gui.GetWindowText(hWnd) in ['QWidgetClassWindow','ScreenBoardClassWindow']  else None, hWndChildList)
+        if win32gui.GetWindowText(hWnd) in ['QWidgetClassWindow',handle_infor[1]]  else None, hWndChildList)
         try:
             win = hWndChildList[0][0]
+            print("当前为夜神模拟器")
         except:
             return -1
     rect = win32gui.GetWindowRect(win)
+
     globalvar.set_window_resolution([rect[2]-rect[0],rect[3]-rect[1]])
     print("当前窗体大小为{}x{}".format(rect[2]-rect[0],rect[3]-rect[1]))
     if (rect[2] - rect[0])==resolution[0] and (rect[3] - rect[1])==resolution[1]:
         pass
     else:
-        print('resolution isn\'t {}p'.format(resolution[1]))
+        #print('resolution isn\'t {}p'.format(resolution[1]))
+        pass
     return win
     # if (rect[2]-rect[0])!=resolution[0] or (rect[3]-rect[1])!=resolution[1]:
     #     raise Exception('resolution isn\'t {}p'.format(resolution[1]))
