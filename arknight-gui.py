@@ -54,8 +54,10 @@ class RunThread(threading.Thread):
         self.shuatu_num = shuatu_num
         if yuanshi_num=="No！":
             globalvar.set_yuanshi(0)
-        else:
-            globalvar.set_yuanshi(int(yuanshi_num))
+        elif yuanshi_num=="仅使用体力药":
+            globalvar.set_yuanshi(1)
+        elif yuanshi_num=="使用源石":
+            globalvar.set_yuanshi(2)
         globalvar.set_thresh_pic(float(thresh)/100)
         self.handle = handle
         threading.Thread.__init__(self)
@@ -159,8 +161,8 @@ class MyFrame1(wx.Frame):
         self.thresh_label = wx.StaticText(self, wx.ID_ANY, u"识图阈值", (185,90), (100,25), 0)
         self.thresh_label.Wrap(-1)
         #
-        yuanshi_choiceChoices = [u"No！", u"1", u"2", u"3", u"4", u"5", u"6", u"7", u"8", u"9", u"10"]
-        self.yuanshi_choice = wx.Choice(self, wx.ID_ANY, (5,120), (55,25), yuanshi_choiceChoices, 0)
+        yuanshi_choiceChoices = [u"No！", u"仅使用体力药", u"使用源石"]
+        self.yuanshi_choice = wx.Choice(self, wx.ID_ANY, (5,120), (80,25), yuanshi_choiceChoices, 0)
         self.yuanshi_choice.SetSelection(0)
 
         self.num = wx.TextCtrl(self, wx.ID_ANY, u"20", (100,120), (40,25), 0)

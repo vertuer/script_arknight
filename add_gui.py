@@ -14,6 +14,12 @@ from basic_function import get_handle,prtsc,pic_locate
 import numpy as np
 import globalvar
 
+def get_dir(where='root'):
+    if where == 'root':
+        path = os.getcwd()
+    elif where == 'pic':
+        path = os.path.join(os.getcwd(),"ark_images/processed")
+    return path
 
 class TREE():
     @staticmethod
@@ -36,8 +42,8 @@ class SubclassDialog(wx.Dialog):
 
 class MyFrame1(wx.Frame):
     def __init__(self, parent, pathToImage=None):
-        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title=wx.EmptyString, pos=wx.DefaultPosition,
-                          size=wx.Size(900,650), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        wx.Frame.__init__(self, parent, id=wx.ID_ANY, title="明日方舟关卡管理", pos=wx.DefaultPosition,
+                          size=wx.Size(900,630), style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
         # relative data
         self.cut_img = None
         self.origin_img = None
@@ -48,29 +54,33 @@ class MyFrame1(wx.Frame):
         # Use English dialog
         self.locale = wx.Locale(wx.LANGUAGE_ENGLISH)
 
+        
 
-        # Intitialise the matplotlib figure
-        # self.figure = plt.figure(facecolor='gray')
+        # Create the fisrt canvas Create an axes, turn off the labels and add them to the figure
         self.figure = Figure(facecolor='gray')
-        # Create an axes, turn off the labels and add them to the figure
         self.axes = plt.Axes(self.figure, [0, 0, 1, 1])
         self.axes.set_axis_off()
         self.figure.add_axes(self.axes)
 
         # Add the figure to the wxFigureCanvas
         self.canvas = FigureCanvas(self, -1, self.figure)
+        # self.canvas.SetSize((320,480))
+        # result = self.canvas.GetScreenRect()
 
-        #关卡选择choice窗体
-        # choices = ["Alpha", "Baker", "Charlie", "Delta"]
-        # self.dialog = wx.ListBox(choices = choices, id=wx.ID_ANY,name='listBox1',
-        #                          parent=self, pos=(650,240),size=wx.Size(80, 80), style=0)
-
-
+        # Create the second canvas for preshow the figure
+        self.figure2 = Figure(facecolor='gray')
+        self.axes2 = plt.Axes(self.figure2, [0, 0, 1, 1])
+        self.axes2.set_axis_off()
+        self.figure2.add_axes(self.axes2)
+        self.canvas2 = FigureCanvas(self, -1, self.figure2)
+        self.canvas2.SetSize((160,120))
+        self.canvas2.SetPosition((710,360))
         # Add Button and Progress Bar
-        self.openBtn = wx.Button(self, -1, "打开文件", pos=(650, 30), size=(70, 40))
-        self.simBtn = wx.Button(self, -1, "模拟器图像载入", pos=(740, 30), size=(100, 40))
-        self.srcBtn = wx.Button(self, -1, "查看截图", pos=(250, 520), size=(150, 50))
-        self.matchBtn = wx.Button(self, -1, "开始图像匹配", pos=(650, 160), size=(80, 40))
+        self.openBtn = wx.Button(self, -1, "打开文件", pos=(650, 10), size=(70, 40))
+        self.simBtn = wx.Button(self, -1, "模拟器图像载入", pos=(740, 10), size=(100, 40))
+        self.srcBtn = wx.Button(self, -1, "查看截图", pos=(180, 500), size=(150, 50))
+        self.saveBtn = wx.Button(self,-1,"保存截图", pos=(360,500), size=(150,50))
+        self.matchBtn = wx.Button(self, -1, "开始图像匹配", pos=(650, 150), size=(80, 40))
         # self.check = wx.CheckBox(self, -1, "一级菜单", pos=(650, 340), size=(70, 20))
         # self.chapterChoice = wx.Choice(self, wx.ID_ANY, (650, 365), (80, 30), self.TotalChapter, 0)
         # self.chapterChoice.SetSelection(0)
@@ -82,18 +92,26 @@ class MyFrame1(wx.Frame):
         # self.yuanshi_choice.SetSelection(0)
         #self.scoreText = wx.StaticText(self, wx.ID_ANY, u"识图分数:", (650, 120), (60, 40), 0)
         #self.scoreText2 = wx.StaticText(self, wx.ID_ANY, u"", (710, 120), (50, 40), 0)
-        self.scoreText3 = wx.StaticText(self, wx.ID_ANY, u"截图来源分辨率:", (650, 120), (100, 40), 0)
-        self.scoreText4 = wx.StaticText(self, wx.ID_ANY, u"", (750, 120), (80, 40), 0)
+        self.scoreText3 = wx.StaticText(self, wx.ID_ANY, u"截图来源分辨率:", (650, 110), (100, 40), 0)
+        self.scoreText4 = wx.StaticText(self, wx.ID_ANY, u"", (750, 110), (80, 40), 0)
+        self.scoreText5 = wx.StaticText(self, wx.ID_ANY, u"模拟器分辨率:", (650, 70), (100, 40), 0)
+        self.scoreText6 = wx.StaticText(self, wx.ID_ANY, u"", (750, 70), (80, 40), 0)
+        self.scoreText7 = wx.StaticText(self, wx.ID_ANY, u"图像预览", (650, 410), (50, 40), 0)
+
+        image = matplotlib.image.imread('789.jpg')
+        self.axes2.imshow(image,aspect='equal')
+        self.canvas2.draw()
+        # image = wx.Image('789.jpg',wx.BITMAP_TYPE_JPEG)
+        # tmp = image.ConvertToBitmap()
+        # self.pic = wx.StaticBitmap(self,wx.ID_ANY,pos=(750,370),size=(120,120),bitmap=tmp)
         guanqia_pic,_ = config_ark.get_guanqia_pic()
         huodong_pic,_ = config_ark.get_huodong_pic()
         self.guanqia_dict = config_ark.get_guanqia(guanqia_pic,huodong_pic)
         self.tree = wx.TreeCtrl(self,id=wx.ID_ANY,pos=(650,220),size=(220,130))
-        # self.imglist = wx.ImageList(16, 16, True, 2)
-        # self.imglist.Add(wx.ArtProvider.GetBitmap(wx.ART_FOLDER, size=wx.Size(16, 16)))
-        # self.imglist.Add(wx.ArtProvider.GetBitmap(wx.ART_NORMAL_FILE, size=(16, 16)))
-        # self.tree.AssignImageList(self.imglist)
-        root = self.tree.AddRoot('root')
 
+        
+        # load the root infor
+        root = self.tree.AddRoot('root')
         for i in self.guanqia_dict.keys():
             total_class = self.tree.AppendItem(root,i)
             for j in self.guanqia_dict[i].keys():
@@ -101,15 +119,26 @@ class MyFrame1(wx.Frame):
                 for k in self.guanqia_dict[i][j]:
                     self.tree.AppendItem(chapter,k)
         self.tree.Expand(root)
+
+        # load the basic pic infor
+        basic_pic = self.tree.AppendItem(root,'basic')
+        self.pic_confirm, self.pic_confirm_res = config_ark.get_confirm_pic()
+        self.pic_where, self.pic_where_res = config_ark.get_where_pic()
+        for i in list(self.pic_where.keys()):
+            self.tree.AppendItem(basic_pic,i)
+        for i in list(self.pic_confirm.keys()):
+            self.tree.AppendItem(basic_pic,i)
+        
+        # for i in self.
+
+        # bind the buttons
         self.Bind(wx.EVT_BUTTON,self.get_score,self.matchBtn)
         self.Bind(wx.EVT_BUTTON,self.show_cut_img,self.srcBtn)
-        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK,self.tree_click,self.tree)
-        #self.check.Bind(wx.EVT_CHECKBOX, self.onCheck)
+        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK,self.tree_r_click,self.tree)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED,self.tree_d_click,self.tree)
+        self.Bind(wx.EVT_BUTTON, self.save_pic, self.saveBtn)
         self.Bind(wx.EVT_BUTTON, self.getSimPic, self.simBtn)
         self.Bind(wx.EVT_BUTTON, self.load, self.openBtn)
-        #self.Bind(wx.EVT_BUTTON, self.save, self.saveBtn)
-        # self.Bind(wx.EVT_BUTTON,self.front,self.frontBtn)
-        # self.Bind(wx.EVT_BUTTON,self.next,self.nextBtn)
 
         # Initialise the rectangle
         self.rect = Rectangle((0, 0), 0, 0, facecolor='None', edgecolor='red')
@@ -191,6 +220,7 @@ class MyFrame1(wx.Frame):
         im = im[:,:,::-1]
         self.origin_img = im
         self.origin_res = [self.origin_img.shape[1], self.origin_img.shape[0]]
+        self.scoreText6.SetLabel('{},{}'.format(self.origin_res[0],self.origin_res[1]))
         self.setImage(im)
 
     # GetFilesPath with the end with .jpg or .png
@@ -205,13 +235,13 @@ class MyFrame1(wx.Frame):
 
     # Load Picture button function
     def load(self, event):
-        filesFilter = "JPEG|*.jpg|PNG|*.png|All files (*.*)|*.*"
-        dlg = wx.FileDialog(self, "choose pic", wildcard=filesFilter, style=wx.DD_DEFAULT_STYLE)
+        filesFilter = "PNG file(*.png)|*.png|All files (*.*)|*.*"
+        dlg = wx.FileDialog(self, "choose pic",defaultDir=get_dir('root'),wildcard=filesFilter, style=wx.DD_DEFAULT_STYLE)
         # dlg = wx.DirDialog(self,"Choose File",style=wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
             if filepath:
-                self.origin_img = cv2.imdecode(np.fromfile(filepath, dtype=np.uint8), -1)
+                self.origin_img = cv2.imdecode(np.fromfile(filepath, dtype=np.uint8), cv2.IMREAD_COLOR)
                 #self.origin_img = cv2.imread(filepath)
                 self.setImage(filepath)
                 #self.origin_res = [self.origin_img.shape[1],self.origin_img.shape[0]]
@@ -220,8 +250,82 @@ class MyFrame1(wx.Frame):
                 print("list null")
         dlg.Destroy()
 
+    # save the cut pic to disk
+    def save_pic(self,event):
+        if isinstance(self.cut_img,np.ndarray):
+            dlg = wx.FileDialog(self,message=u"保存文件",defaultDir=get_dir('pic'),
+                                                        defaultFile=".png",
+                                                        wildcard='PNG file(*.png)|*.png',style=wx.FD_SAVE)
+            if dlg.ShowModal()==wx.ID_OK:
+                file_name = dlg.GetFilename()
+                dir_name = dlg.GetDirectory()
+                save_file = os.path.join(dir_name,file_name)
+                if os.path.isfile(save_file):
+                    tmp = wx.MessageBox("文件已存在，是否覆盖？","确认",wx.OK)
+                    if tmp == wx.ID_OK:
+                        cv2.imencode('.png', self.cut_img)[1].tofile(save_file)
+                else:
+                    cv2.imencode('.png',self.cut_img)[1].tofile(save_file)
+        else:
+            wx.MessageBox('请先截图')
+            
+    #双击tree时触发
+    def tree_d_click(self,event):
+        tmp_parent = self._get_tree_struct()
+        num_parent = len(tmp_parent)
+        if num_parent>1:
+            if 'basic' in tmp_parent:
+                if num_parent>2:
+                    img_path = config_ark.get_basic_path(tmp_parent[-1])
+                    img_res = config_ark.get_basic_res(tmp_parent[-1])
+                    if os.path.exists(img_path):
+                        self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                        image = self.cut_img
+                        image = image[:, :, ::-1]
+                        self.axes2.imshow(image, aspect='equal')
+                        self.canvas2.draw()
+                        #载入图像分辨率信息
+                        self.scoreText4.SetLabel('{},{}'.format(img_res[0],img_res[1]))
+                        self.origin_res = img_res
+                    else:
+                        wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
+            else:
+                if tmp_parent[1] == '活动':
+                    huodong = True
+                else:
+                    huodong = False
+                if num_parent==4:
+                    tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]+"|"+tmp_parent[3]
+                elif num_parent==3:
+                    tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]
+                elif num_parent==2:
+                    tmp = config_ark.ChapterCTE(tmp_parent[1])
+                if num_parent==4:
+                    dialog = SubclassDialog()
+                    result = dialog.ShowModal()
+                    if result == wx.ID_CANCEL:
+                        img_path = config_ark.get_img_path(tmp + '_confirm',huodong)
+                        tmp_res = config_ark.get_img_res(tmp + '_confirm', huodong)
+                    else:
+                        img_path = config_ark.get_img_path(tmp,huodong)
+                        tmp_res = config_ark.get_img_res(tmp, huodong)
+                else:
+                    img_path = config_ark.get_img_path(tmp,huodong)
+                    tmp_res = config_ark.get_img_res(tmp, huodong)
+                if os.path.exists(img_path):
+                    self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                    image = self.cut_img
+                    image = image[:, :, ::-1]
+                    self.axes2.imshow(image, aspect='equal')
+                    self.canvas2.draw()
+                    #载入图像分辨率信息
+                    self.scoreText4.SetLabel('{},{}'.format(tmp_res[0],tmp_res[1]))
+                    self.origin_res = tmp_res
+                else:
+                    wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
+
     #右键tree时触发
-    def tree_click(self,event):
+    def tree_r_click(self,event):
         pos = event.GetPoint()
         pos_ctrl = self.tree.GetPosition()
         pos = pos + pos_ctrl
@@ -229,65 +333,87 @@ class MyFrame1(wx.Frame):
         tmp_parent = self._get_tree_struct()
         self.popmenu = wx.Menu()
         num_level = len(tmp_parent)
-        if num_level is 2:
-            self.popmenu.Append(-1,'修改图库')
-            tmp = self.popmenu.Append(-1, '载入图库')
-            self.Bind(wx.EVT_MENU,self.show_pic,tmp)
-            tmp = self.popmenu.Append(-1,'添加章节')
-            self.Bind(wx.EVT_MENU,self.save_chapter,tmp)
-        elif num_level is 3:
-            self.popmenu.Append(-1,'重命名')
-            tmp = self.popmenu.Append(-1, '载入章节图库')
-            self.Bind(wx.EVT_MENU,self.show_pic,tmp)
-            tmp = self.popmenu.Append(-1,'添加关卡图库')
-            self.Bind(wx.EVT_MENU,self.save_guanqia,tmp)
-            tmp = self.popmenu.Append(-1,'添加关卡确认图库')
-            self.Bind(wx.EVT_MENU,self.save_guanqia_confirm,tmp)
-            tmp = self.popmenu.Append(-1,'删除章节')
-            self.Bind(wx.EVT_MENU,self.delete_item,tmp)
-        elif num_level is 4:
-            self.popmenu.Append(-1,'重命名')
-            tmp = self.popmenu.Append(-1, '载入关卡图库')
-            self.Bind(wx.EVT_MENU,self.show_pic,tmp)
-            tmp = self.popmenu.Append(-1,'删除关卡')
-            self.Bind(wx.EVT_MENU,self.delete_item,tmp)
+        if "basic" in tmp_parent:
+            if num_level is 3:
+                tmp = self.popmenu.Append(-1,'载入相关图库')
+                self.Bind(wx.EVT_MENU,self.show_pic,tmp)
+                tmp = self.popmenu.Append(-1,'修改相关图库')
+                #need complete
+                self.Bind(wx.EVT_MENU,self.save_pic,tmp)
+        else:
+            if num_level is 2:
+                self.popmenu.Append(-1,'修改图库')
+                tmp = self.popmenu.Append(-1, '载入图库')
+                self.Bind(wx.EVT_MENU,self.show_pic,tmp)
+                tmp = self.popmenu.Append(-1,'添加章节')
+                self.Bind(wx.EVT_MENU,self.save_chapter,tmp)
+            elif num_level is 3:
+                self.popmenu.Append(-1,'重命名')
+                tmp = self.popmenu.Append(-1, '载入章节图库')
+                self.Bind(wx.EVT_MENU,self.show_pic,tmp)
+                tmp = self.popmenu.Append(-1,'添加关卡图库')
+                self.Bind(wx.EVT_MENU,self.save_guanqia,tmp)
+                tmp = self.popmenu.Append(-1,'添加关卡确认图库')
+                self.Bind(wx.EVT_MENU,self.save_guanqia_confirm,tmp)
+                tmp = self.popmenu.Append(-1,'删除章节')
+                self.Bind(wx.EVT_MENU,self.delete_item,tmp)
+            elif num_level is 4:
+                self.popmenu.Append(-1,'重命名')
+                tmp = self.popmenu.Append(-1, '载入关卡图库')
+                self.Bind(wx.EVT_MENU,self.show_pic,tmp)
+                tmp = self.popmenu.Append(-1,'删除关卡')
+                self.Bind(wx.EVT_MENU,self.delete_item,tmp)
         self.PopupMenu(self.popmenu,pos)
         #self.tree.Get
     #双击tree控件时显示对应库中的图库,并自动载入到可以供识图的变量中
     def show_pic(self,event):
         tmp_parent = self._get_tree_struct()
         num_parent = len(tmp_parent)
-        if tmp_parent[1] == '活动':
-            huodong = True
+        if 'basic' in tmp_parent:
+            img_path = config_ark.get_basic_path(tmp_parent[-1])
+            img_res = config_ark.get_basic_res(tmp_parent[-1])
+            if os.path.exists(img_path):
+                self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                cv2.destroyAllWindows()
+                cv2.imshow('cut_image', self.cut_img)
+                #载入图像分辨率信息
+                self.scoreText4.SetLabel('{},{}'.format(img_res[0],img_res[1]))
+                self.origin_res = img_res
+            else:
+                wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
         else:
-            huodong = False
-        if num_parent==4:
-            tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]+"|"+tmp_parent[3]
-        elif num_parent==3:
-            tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]
-        elif num_parent==2:
-            tmp = config_ark.ChapterCTE(tmp_parent[1])
-        if num_parent==4:
-            dialog = SubclassDialog()
-            result = dialog.ShowModal()
-            if result == wx.ID_CANCEL:
-                img_path = config_ark.get_img_path(tmp + '_confirm',huodong)
-                tmp_res = config_ark.get_img_res(tmp + '_confirm', huodong)
+            if tmp_parent[1] == '活动':
+                huodong = True
+            else:
+                huodong = False
+            if num_parent==4:
+                tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]+"|"+tmp_parent[3]
+            elif num_parent==3:
+                tmp = config_ark.ChapterCTE(tmp_parent[1])+ '|' + tmp_parent[2]
+            elif num_parent==2:
+                tmp = config_ark.ChapterCTE(tmp_parent[1])
+            if num_parent==4:
+                dialog = SubclassDialog()
+                result = dialog.ShowModal()
+                if result == wx.ID_CANCEL:
+                    img_path = config_ark.get_img_path(tmp + '_confirm',huodong)
+                    tmp_res = config_ark.get_img_res(tmp + '_confirm', huodong)
+                else:
+                    img_path = config_ark.get_img_path(tmp,huodong)
+                    tmp_res = config_ark.get_img_res(tmp, huodong)
             else:
                 img_path = config_ark.get_img_path(tmp,huodong)
                 tmp_res = config_ark.get_img_res(tmp, huodong)
-        else:
-            img_path = config_ark.get_img_path(tmp,huodong)
-            tmp_res = config_ark.get_img_res(tmp, huodong)
-        if os.path.exists(img_path):
-            self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), -1)
-            #self.cut_img = cv2.imread(img_path.encode('gbk').decode())
-            cv2.destroyAllWindows()
-            cv2.imshow('cut_image', self.cut_img)
-            self.scoreText4.SetLabel('{},{}'.format(tmp_res[0],tmp_res[1]))
-            self.origin_res = tmp_res
-        else:
-            wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
+            if os.path.exists(img_path):
+                self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                #self.cut_img = cv2.imread(img_path.encode('gbk').decode())
+                cv2.destroyAllWindows()
+                cv2.imshow('cut_image', self.cut_img)
+                #载入图像分辨率信息
+                self.scoreText4.SetLabel('{},{}'.format(tmp_res[0],tmp_res[1]))
+                self.origin_res = tmp_res
+            else:
+                wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
 
 
 
@@ -662,30 +788,6 @@ class MyFrame1(wx.Frame):
         else:
             image = matplotlib.image.imread(image)
 
-        # Save the image's dimensions from PIL
-        #self.imageSize = imPIL.size
-
-        '''
-        self.imageSize = image.shape
-        print(pathToImage)
-        print("It's width and height:")
-        print(self.imageSize)
-
-        print("------------------------")
-
-        # OpenCV add text on pic
-        str1='(%s,%s)' % (str(self.imageSize[0]),str(self.imageSize[1]))
-        rev=wx.StaticText(self,-1,str1,(670,400))
-        #rev.SetForegroundColour('white')
-        #rev.SetBackgroundColour('black')
-        #rev.SetFont(wx.Font(15,wx.DECORATIVE,wx.ITALIC,wx.NORMAL))
-        cv2.putText(image,str1,(10,200), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,0,0),2)
-        '''
-
-        #str1 = '%s,%s' % (str(self.imageSize[0]), str(self.imageSize[1]))
-        #rev = wx.StaticText(self, -1, str1, (680, 550))
-
-        # Add the image to the figure and redraw the canvas. Also ensure the aspect ratio of the image is retained.
         self.axes.imshow(image, aspect='equal')
 
         self.canvas.draw()

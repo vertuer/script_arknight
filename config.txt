@@ -2,3 +2,5 @@
 ScreenBoardClassWindow
 明日方舟 - MuMu模拟器
 NemuPlayer
+雷电模拟器
+TheRender

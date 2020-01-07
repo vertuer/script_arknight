@@ -404,26 +404,52 @@ class Zhuxian:
         elif position == "zhandou_end":
             return self.operation_mapping["判断战役成功"]
         elif position == "yuanshi_lizhi":
-            if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
-                #逻辑需要优化，遇到网络波动时，会出现吃了药却石乐志了情况
-                if function_ark.confirm_where(self.handle,config_ark.pic_confirm['60tili']):
-                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
-                    print('使用60体力药')
-                    time.sleep(1)
-                elif function_ark.confirm_where(self.handle,config_ark.pic_confirm['100tili']):
-                    function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
-                    print('使用100体力药')
-                    time.sleep(1)
+            #####暂定
+            if function_ark.confirm_where(self.handle,config_ark.pic_confirm['yuanshi']):
+                #处于氪源石的界面
+                if globalvar.get_yuanshi() == 2:
+                    position = function_ark.pic_position(self.handle,config_ark.pic_confirm['ok'],once=2)
+                    if position!=None:
+                        function_ark.mouse_click(self.handle, position["result"])
+                        globalvar.yuanshi_used_add(1)
+                        print('使用源石一次,当前使用源石次数{}'.format(globalvar.get_yuanshi_used()))
+                    else:
+                        print("源石界面嗑药失败")
                 else:
-                    function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
-                    print('没有体力药或者是别的情况,总之还是石乐志')
+                    print("失了智，脚本结束")
                     raise config_ark.ExitError
-                globalvar.yuanshi_used_add(1)
             else:
-                function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
-                print("石乐志，结束")
-                raise config_ark.ExitError
-            time.sleep(1)
+                #处于氪体力药的界面
+                if globalvar.get_yuanshi() in [1,2]:
+                    position = function_ark.pic_position(self.handle,config_ark.pic_confirm['ok'],once=2)
+                    if position!=None:
+                        function_ark.mouse_click(self.handle,position["result"])
+                        print('使用体力药一次')
+                else:
+                    print("失了智，脚本结束")
+                    raise config_ark.ExitError
+            time.sleep(2) 
+
+            # if globalvar.get_yuanshi() > globalvar.get_yuanshi_used():
+            #     #逻辑需要优化，遇到网络波动时，会出现吃了药却石乐志了情况
+            #     if function_ark.confirm_where(self.handle,config_ark.pic_confirm['60tili']):
+            #         function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+            #         print('使用60体力药')
+            #         time.sleep(1)
+            #     elif function_ark.confirm_where(self.handle,config_ark.pic_confirm['100tili']):
+            #         function_ark.mouse_click(self.handle, config_ark.points["tili_ok"])
+            #         print('使用100体力药')
+            #         time.sleep(1)
+            #     else:
+            #         function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+            #         print('没有体力药或者是别的情况,总之还是石乐志')
+            #         raise config_ark.ExitError
+            #     globalvar.yuanshi_used_add(1)
+            # else:
+            #     function_ark.mouse_click(self.handle,config_ark.points["kongbai"])
+            #     print("石乐志，结束")
+            #     raise config_ark.ExitError
+            # time.sleep(1)
 
         else:
             position1 = function_ark.pic_position(self.handle, config_ark.pic_where["enter_quick"], once=2)
@@ -518,10 +544,9 @@ class Zhuxian:
             self.start_once()
             time.sleep(3)
 if __name__ == "__main__":
-    temp = ["GT2","GT3","GT4","GT5","GT6"]              #支持的关卡
-
     handle = get_handle([1280,720])                         #获取模拟器窗体句柄
-    pic_load_ram()                                          #将配置文件中的图像载入内存
+    config_ark.pic_load_ram()                                          #将配置文件中的图像载入内存
+    function_ark.confirm_where(handle,config_ark.pic_where['yuanshi_lizhi'])
     function_ark.confirm_where(handle, config_ark.guanqia_pic["CE-5_confirm"])
     function_ark.confirm_where(handle,config_ark.guanqia_pic['1-7'])
     temp_class = Zhuxian(handle, num=1, guanqia='1-7')

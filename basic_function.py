@@ -157,31 +157,52 @@ def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
                                                            win32gui.GetClassName(hWnd),
                                                            win32gui.GetWindowText(hWnd)])
                          , handlelist)
-    win = win32gui.FindWindow(None, handle_infor[0])
-    if win==0:
-        win = win32gui.FindWindow(None, handle_infor[2])
-        hWndChildList = []
-        win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
+    exist = False
+    for i in range(0,len(handle_infor),2):
+        win = win32gui.FindWindow(None,handle_infor[i])
+        if win==0:
+            continue
+        else:
+            hWndChildList = []
+            win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
                                                                             , win32gui.GetClassName(hWnd)
                                                                             , win32gui.GetWindowText(hWnd)])
-        if win32gui.GetWindowText(hWnd) in [handle_infor[3]]  else None, hWndChildList)
-        try:
-            win = hWndChildList[0][0]
-            print("当前为mumu模拟器")
-        except:
-            return -1
+            if win32gui.GetWindowText(hWnd) in [handle_infor[i+1]]  else None, hWndChildList)
+            try:
+                win = hWndChildList[0][0]
+                print("当前检测到{}模拟器".format(handle_infor[i]))
+                exist = True
+                break
+            except:
+                continue
+    if exist==False:
+        return -1
+    # win = win32gui.FindWindow(None, handle_infor[0])
+    # if win==0:
+    #     win = win32gui.FindWindow(None, handle_infor[2])
+    #     hWndChildList = []
+    #     win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
+    #                                                                         , win32gui.GetClassName(hWnd)
+    #                                                                         , win32gui.GetWindowText(hWnd)])
+    #     if win32gui.GetWindowText(hWnd) in [handle_infor[3]]  else None, hWndChildList)
+    #     try:
+    #         win = hWndChildList[0][0]
+    #         print("当前为mumu模拟器")
+    #     except:
+    #         return -1
 
-    else:
-        hWndChildList = []
-        win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
-                                                                            , win32gui.GetClassName(hWnd)
-                                                                            , win32gui.GetWindowText(hWnd)])
-        if win32gui.GetWindowText(hWnd) in ['QWidgetClassWindow',handle_infor[1]]  else None, hWndChildList)
-        try:
-            win = hWndChildList[0][0]
-            print("当前为夜神模拟器")
-        except:
-            return -1
+    # else:
+    #     hWndChildList = []
+    #     win32gui.EnumChildWindows(win, lambda hWnd, param: param.append([hWnd
+    #                                                                         , win32gui.GetClassName(hWnd)
+    #                                                                         , win32gui.GetWindowText(hWnd)])
+    #     if win32gui.GetWindowText(hWnd) in ['QWidgetClassWindow',handle_infor[1]]  else None, hWndChildList)
+    #     try:
+    #         win = hWndChildList[0][0]
+    #         print("当前为夜神模拟器")
+    #     except:
+    #         return -1
+    
     rect = win32gui.GetWindowRect(win)
 
     globalvar.set_window_resolution([rect[2]-rect[0],rect[3]-rect[1]])
@@ -194,3 +215,7 @@ def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
     return win
     # if (rect[2]-rect[0])!=resolution[0] or (rect[3]-rect[1])!=resolution[1]:
     #     raise Exception('resolution isn\'t {}p'.format(resolution[1]))
+
+if __name__ == "__main__":
+    #this is just a handle test
+    handle = get_handle()

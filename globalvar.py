@@ -5,7 +5,7 @@ class global_val:
     yuanshi_used = 0             #已经碎石的数量
     thresh_pic = 0.8
     drag_speed = 20
-    yuanshi = 0
+    yuanshi = 0   #0表示不使用体力药及源石，1表示仅使用体力药，2表示使用体力药及源石
     duochong = True   #是否多重验证
     CONFIG_FILE = "./config.txt"
     handle_infor = []
@@ -18,6 +18,10 @@ class global_val:
         else:
             file.close()
             break
+
+def init_value():
+    global_val.yuanshi_used = 0             #已经碎石的数量
+
 def set_thresh_pic(value):
     global_val.thresh_pic = value
 def get_thresh_pic():

@@ -70,6 +70,8 @@ def get_confirm_pic():
     with open(os.path.join(CONFIG_PATH,"pic_confirm"),'r',encoding='utf-8') as file:
         while(1):
             tmp = file.readline()
+            if tmp in ['\n',' ']:
+                continue
             if not tmp:
                 break
             tmp = tmp.split(' ')
@@ -77,6 +79,23 @@ def get_confirm_pic():
             confirm_pic_res[tmp[0]] = [int(tmp[2]),int(tmp[3].strip('\n'))]
     file.close()
     return confirm_pic,confirm_pic_res
+
+def get_where_pic():
+    where_pic = {}
+    where_pic_res = {}
+    with open(os.path.join(CONFIG_PATH,"pic_where"),'r',encoding='utf-8') as file:
+        while(1):
+            tmp = file.readline()
+            if tmp in ['\n',' ']:
+                continue
+            if not tmp:
+                break
+            tmp = tmp.split(' ')
+            where_pic[tmp[0]] = tmp[1]
+            where_pic_res[tmp[0]] = [int(tmp[2]),int(tmp[3].strip('\n'))]
+    file.close()
+    return where_pic,where_pic_res
+
 def get_guanqia_pic():
     guanqia_pic = {}
     guanqia_pic_res = {}
@@ -98,6 +117,8 @@ def get_huodong_pic():
     with open(os.path.join(CONFIG_PATH,"pic_huodong"),'r',encoding='utf-8') as file:
         while(1):
             tmp = file.readline()
+            if tmp in ['\n',' ']:
+                continue
             if not tmp:
                 break
             tmp = tmp.split(' ')
@@ -108,6 +129,7 @@ def get_huodong_pic():
 pic_confirm,pic_confirm_res = get_confirm_pic()
 guanqia_pic,guanqia_pic_res = get_guanqia_pic()
 huodong_pic,huodong_pic_res = get_huodong_pic()
+pic_where,pic_where_res = get_where_pic()
 def ChapterCTE(chapter):
     reverse_mapping = {'主线':'ZX','物资筹备':'WZ','芯片获取':'PR','活动':'HD'}
     # reverse_mapping = {'第一章':'1','第二章':'2','第三章':'3','第四章':'4','第五章':'5',
@@ -119,18 +141,43 @@ def ChapterETC(chapter):
     #               'LS':'经验本','AP':'红票子','CE':'龙门币','SK':'建材','HD':'活动'}
     return mapping_keys[chapter]
 
+def get_basic_path(name):
+    # return the basic img path
+    if name in list(pic_where.keys()):
+        return pic_where[name]
+    elif name in list(pic_confirm.keys()):
+        return pic_confirm[name]
+    else:
+        #这种情况不应该出现
+        raise Exception
+def get_basic_res(name):
+    # reuturn the basic img resolution 
+    if name in list(pic_where_res.keys()):
+        return pic_where_res[name]
+    elif name in list(pic_confirm_res.keys()):
+        return pic_confirm_res[name]
+    else:
+        #同上
+        raise Exception
 def get_img_path(name,huodong=False):
+    # return the huodong & guanqia pic path
     if huodong:
         return huodong_pic[name]
     else:
         return guanqia_pic[name]
 def get_img_res(name,huodong=False):
+    # return the huodong & guanqia pic resolution
     if huodong:
         return huodong_pic_res[name]
     else:
         return guanqia_pic_res[name]
 
 def get_guanqia(guanqia_pic,pic_huodong):
+    """
+    guanqia_pic: path infor of guanqia 
+    pic_huodong: path infor of huodong
+    return guanqia_dict: the mix of guanqia & huodong(without XXX_confirm etc.)
+    """
     tmp1 = list(guanqia_pic.keys())
     tmp2 = list(pic_huodong.keys())
     tmp_guanqia = tmp1 + tmp2
@@ -206,6 +253,10 @@ def pic_load_ram():
     for keys, pic_path in guanqia_pic.items():
         temp_im = pic_resize(pic_path,window_resolution,guanqia_pic_res[keys])
         guanqia_pic[keys] = np.array(temp_im)
+
+    for keys, pic_path in pic_where.items():
+        temp_im = pic_resize(pic_path,window_resolution,pic_where_res[keys])
+        pic_where[keys] = np.array(temp_im)
     #常量点 自定义分辨率适应
     for keys,values in points.items():
         if isinstance(values[0],int):
@@ -218,86 +269,25 @@ def pic_load_ram():
                 height = int(window_resolution[1] / max_resolution[1] * value_temp[1])
                 values[index] = [width, height]
             points[keys] = values
-# guanqia_pic = {
-#     "1-11": os.path.join(guanqia_path, "1-11.png"),
-#     "1-11_confirm": os.path.join(guanqia_path, "1-11_confirm.png"),
-#     "1-7": os.path.join(guanqia_path, "1-7.png"),
-#     "1-7_confirm": os.path.join(guanqia_path, "1-7_confirm.png"),
-#     "LS-5": os.path.join(guanqia_path, "LS-5.png"),
-#     "LS-5_confirm": os.path.join(guanqia_path, "LS-5_confirm.png"),
-#     "CE-5": os.path.join(guanqia_path, "CE-5.png"),
-#     "CE-5_confirm": os.path.join(guanqia_path, "CE-5_confirm.png"),
-#     "AP-5": os.path.join(guanqia_path, "AP-5.png"),
-#     "AP-5_confirm": os.path.join(guanqia_path, "AP-5_confirm.png"),
-#     "SK-5": os.path.join(guanqia_path, "SK-5.png"),
-#     "SK-5_confirm": os.path.join(guanqia_path, "SK-5_confirm.png"),
-#     "SK-3": os.path.join(guanqia_path, "SK-3.png"),
-#     "SK-3_confirm": os.path.join(guanqia_path, "SK-3_confirm.png"),
-#     "S2-12": os.path.join(guanqia_path, "S2-12.png"),
-#     "S2-12_confirm": os.path.join(guanqia_path, "S2-12_confirm.png"),
-# }
-pic_where = {
-    "gonggao": os.path.join(pic_path,"gonggao.png"),
-    "zhujiemian": os.path.join(pic_path,"zhandou.png"),
-    "zhandou_xuanze": os.path.join(pic_path,"guanqia","zhandou_jiemian.png"),
-    "huodong_xuanze": os.path.join(huodong_path,"zhandou_huodong_confirm.png"),
-    "zhandou_start": os.path.join(pic_path,"zhandou_start.png"),
-    "zhandou_ing": os.path.join(pic_path,"zhandouing.png"),
-    "zhandou_end": os.path.join(pic_path,"zhandou_end.png"),
-    "yuanshi_lizhi": os.path.join(pic_path, "yuanshi_lizhi.png"),
-    "enter_quick": os.path.join(pic_path, "enter_quick.png"),
-    "skip": os.path.join(pic_path, "skip.png"),
-    "zhandou_failed": os.path.join(pic_path, "mission_failed.png"),
-    #门票不足
-}
-pic_where_res = {}
-for i in pic_where.keys():
-    pic_where_res[i] = [1920,1080]
-# pic_huodong = {
-#     "GT2": os.path.join(huodong_path,"huodong_GT2.png"),
-#     "GT3": os.path.join(huodong_path,"huodong_GT3.png"),
-#     "GT4": os.path.join(huodong_path,"huodong_GT4.png"),
-#     "GT5": os.path.join(huodong_path,"huodong_GT5.png"),
-#     "GT6": os.path.join(huodong_path,"huodong_GT6.png"),
-#     "GT2_confirm": os.path.join(huodong_path, "huodong_GT2_confirm.png"),
-#     "GT3_confirm": os.path.join(huodong_path, "huodong_GT3_confirm.png"),
-#     "GT4_confirm": os.path.join(huodong_path, "huodong_GT4_confirm.png"),
-#     "GT5_confirm": os.path.join(huodong_path, "huodong_GT5_confirm.png"),
-#     "GT6_confirm": os.path.join(huodong_path, "huodong_GT6_confirm.png"),
-#     "huodong_enter": os.path.join(huodong_path,"zhandou_huodong1.png"),
-# }
 
-# pic_confirm = {
-#     "60tili": os.path.join(pic_path, "60ti.png"),
-#     "100tili": os.path.join(pic_path, "100ti.png"),
-#     "daili_do": os.path.join(pic_path, "daili_do.png"),
-#     "daili_undo": os.path.join(pic_path, "daili_undo.png"),
-#     "zhandou_pause": os.path.join(pic_path, "zhandou_pause.png"),
-#     "daili_confirm": os.path.join(pic_path, "daili_confirm.png"),
-#     "enter_quick": os.path.join(pic_path,"enter_quick.png"),
-#     "zhandou_quickenter": os.path.join(pic_path,"zhandou_quickenter.png"),
-#     "yuanshi_lizhi": os.path.join(pic_path,"yuanshi_lizhi.png"),
-#     "bushu_fangxiang": os.path.join(pic_path,"bushu_fangxiang.png"),
-#     "2xspeed": os.path.join(pic_path,"2xspeed.png"),
-#     "1xspeed": os.path.join(pic_path, "1xspeed.png"),
-#     "chapter1": os.path.join(pic_path, "chapter1.png"),
-#     "chapter2": os.path.join(pic_path, "chapter2.png"),
-#     "chapter3": os.path.join(pic_path, "chapter3.png"),
-#     "chapter4": os.path.join(pic_path, "chapter4.png"),
-#     "gouliang": os.path.join(pic_path, "gouliang.png"),
-#     "hongpiao": os.path.join(pic_path, "hongpiao.png"),
-#     "jiancai": os.path.join(pic_path, "jiancai.png"),
-#     "longmenbi": os.path.join(pic_path, "longmenbi.png"),
+# pic_where = {
+#     "gonggao": os.path.join(pic_path,"gonggao.png"),
+#     "zhujiemian": os.path.join(pic_path,"zhandou.png"),
+#     "zhandou_xuanze": os.path.join(pic_path,"guanqia","zhandou_jiemian.png"),
+#     "huodong_xuanze": os.path.join(huodong_path,"zhandou_huodong_confirm.png"),
+#     "zhandou_start": os.path.join(pic_path,"zhandou_start.png"),
+#     "zhandou_ing": os.path.join(pic_path,"zhandouing.png"),
+#     "zhandou_end": os.path.join(pic_path,"zhandou_end.png"),
+#     "yuanshi_lizhi": os.path.join(pic_path, "yuanshi_lizhi.png"),
+#     "enter_quick": os.path.join(pic_path, "enter_quick.png"),
 #     "skip": os.path.join(pic_path, "skip.png"),
-#     "skip_confirm": os.path.join(pic_path, "skip_confirm.png"),
-#     "zhuxian": os.path.join(pic_path, "zhandou_jiemian.png"),
-#     "wuzichoubei": os.path.join(pic_path, "wuzichoubei.png"),
-#     "xinpiansousuo": os.path.join(pic_path, "xinpiansousuo.png"),
-#     "LS": os.path.join(pic_path, "gouliang.png"),
-#     "AP": os.path.join(pic_path, "hongpiao.png"),
-#     "SK": os.path.join(pic_path, "jiancai.png"),
-#     "CE": os.path.join(pic_path, "longmenbi.png"),
+#     "zhandou_failed": os.path.join(pic_path, "mission_failed.png"),
+#     #门票不足
 # }
+# pic_where_res = {}
+# for i in pic_where.keys():
+#     pic_where_res[i] = [1920,1080]
+
 pic_others = {
     "daili_undo": os.path.join(pic_path,"daili_undo.png"),
     "daili_do": os.path.join(pic_path,"daili_do.png"),
@@ -307,8 +297,9 @@ pic_others = {
 
 
 if __name__ == "__main__":
-    # file = open('./config/guanqia','w')
-    # for i in guanqia_pic.keys():
-    #     file.write("{} {}\n".format(i,guanqia_pic[i]))
-    # file.close()
+    pic_where, pic_where_res = get_where_pic()
+    file = open('./config/pic_where','w')
+    for i in pic_where.keys():
+        file.write("{} {} {} {}\n".format(i,pic_where[i],pic_where_res[i][0],pic_where_res[i][1]))
+    file.close()
     print(123)

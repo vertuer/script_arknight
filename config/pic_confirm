@@ -1,5 +1,3 @@
-60tili ./ark_images/processed\60ti.png 1920 1080
-100tili ./ark_images/processed\100ti.png 1920 1080
 daili_do ./ark_images/processed\daili_do.png 1920 1080
 daili_undo ./ark_images/processed\daili_undo.png 1920 1080
 zhandou_pause ./ark_images/processed\zhandou_pause.png 1920 1080
@@ -12,3 +10,6 @@ bushu_fangxiang ./ark_images/processed\bushu_fangxiang.png 1920 1080
 1xspeed ./ark_images/processed\1xspeed.png 1920 1080
 skip ./ark_images/processed\skip.png 1920 1080
 skip_confirm ./ark_images/processed\skip_confirm.png 1920 1080
+yuanshi ./ark_images/processed\yuanshi.png 1280 720
+ok ./ark_images/processed\ok.png 1280 720
+no ./ark_images/processed\no.png 1280 720
