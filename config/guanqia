@@ -2,8 +2,6 @@ ZX|第一章|1-11 ./ark_images/processed/guanqia\1-11.png 1920 1080
 ZX|第一章|1-11_confirm ./ark_images/processed/guanqia\1-11_confirm.png 1920 1080
 ZX|第一章|1-7 ./ark_images/processed/guanqia\1-7.png 1920 1080
 ZX|第一章|1-7_confirm ./ark_images/processed/guanqia\1-7_confirm.png 1920 1080
-WZ|经验|LS-5 ./ark_images/processed/guanqia\LS-5.png 1920 1080
-WZ|经验|LS-5_confirm ./ark_images/processed/guanqia\LS-5_confirm.png 1920 1080
 WZ|龙门币|CE-5 ./ark_images/processed/guanqia\CE-5.png 1920 1080
 WZ|龙门币|CE-5_confirm ./ark_images/processed/guanqia\CE-5_confirm.png 1920 1080
 WZ|红票子|AP-5 ./ark_images/processed/guanqia\AP-5.png 1920 1080
@@ -28,3 +26,5 @@ WZ|龙门币 ./ark_images/processed/guanqia\longmenbi.png 1920 1080
 
 WZ|龙门币|CE-4 ./ark_images/processed/guanqia\CE-4.png 1280 720
 WZ|龙门币|CE-4_confirm ./ark_images/processed/guanqia\CE-4_confirm.png 1280 720
+WZ|经验|LS-5 ./ark_images/processed/guanqia\LS-5.png 1280 720
+WZ|经验|LS-5_confirm ./ark_images/processed/guanqia\LS-5_confirm.png 1280 720

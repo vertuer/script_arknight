@@ -212,7 +212,8 @@ class MyFrame1(wx.Frame):
             for j in self.draws:
                 j.remove()
             self.draws = []
-
+        else:
+            wx.MessageBox("模拟器中没有包含所选图像")
     def getSimPic(self,event):
         # 获取模拟器当前图像信息
         self.handle = get_handle()
@@ -261,8 +262,8 @@ class MyFrame1(wx.Frame):
                 dir_name = dlg.GetDirectory()
                 save_file = os.path.join(dir_name,file_name)
                 if os.path.isfile(save_file):
-                    tmp = wx.MessageBox("文件已存在，是否覆盖？","确认",wx.OK)
-                    if tmp == wx.ID_OK:
+                    tmp = wx.MessageBox("文件已存在，是否覆盖？","确认",wx.CANCEL|wx.OK)
+                    if tmp == wx.OK:
                         cv2.imencode('.png', self.cut_img)[1].tofile(save_file)
                 else:
                     cv2.imencode('.png',self.cut_img)[1].tofile(save_file)
@@ -279,14 +280,14 @@ class MyFrame1(wx.Frame):
                     img_path = config_ark.get_basic_path(tmp_parent[-1])
                     img_res = config_ark.get_basic_res(tmp_parent[-1])
                     if os.path.exists(img_path):
-                        self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
-                        image = self.cut_img
+                        image = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                        #image = self.cut_img
                         image = image[:, :, ::-1]
                         self.axes2.imshow(image, aspect='equal')
                         self.canvas2.draw()
                         #载入图像分辨率信息
-                        self.scoreText4.SetLabel('{},{}'.format(img_res[0],img_res[1]))
-                        self.origin_res = img_res
+                        #self.scoreText4.SetLabel('{},{}'.format(img_res[0],img_res[1]))
+                        #self.origin_res = img_res
                     else:
                         wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
             else:
@@ -313,14 +314,14 @@ class MyFrame1(wx.Frame):
                     img_path = config_ark.get_img_path(tmp,huodong)
                     tmp_res = config_ark.get_img_res(tmp, huodong)
                 if os.path.exists(img_path):
-                    self.cut_img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
-                    image = self.cut_img
+                    image = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+                    #image = self.cut_img
                     image = image[:, :, ::-1]
                     self.axes2.imshow(image, aspect='equal')
                     self.canvas2.draw()
                     #载入图像分辨率信息
-                    self.scoreText4.SetLabel('{},{}'.format(tmp_res[0],tmp_res[1]))
-                    self.origin_res = tmp_res
+                    #self.scoreText4.SetLabel('{},{}'.format(tmp_res[0],tmp_res[1]))
+                    #self.origin_res = tmp_res
                 else:
                     wx.MessageBox('img_file {} doesn\'t exsit'.format(img_path))
 

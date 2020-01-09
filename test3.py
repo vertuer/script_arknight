@@ -546,10 +546,11 @@ class Zhuxian:
 if __name__ == "__main__":
     handle = get_handle([1280,720])                         #获取模拟器窗体句柄
     config_ark.pic_load_ram()                                          #将配置文件中的图像载入内存
-    function_ark.confirm_where(handle,config_ark.pic_where['yuanshi_lizhi'])
-    function_ark.confirm_where(handle, config_ark.guanqia_pic["CE-5_confirm"])
-    function_ark.confirm_where(handle,config_ark.guanqia_pic['1-7'])
+    # function_ark.confirm_where(handle,config_ark.pic_where['yuanshi_lizhi'])
+    # function_ark.confirm_where(handle, config_ark.guanqia_pic["CE-5_confirm"])
+    # function_ark.confirm_where(handle,config_ark.guanqia_pic['1-7'])
     temp_class = Zhuxian(handle, num=1, guanqia='1-7')
+    result = temp_class.find_where()
     temp_class.start()
     temp_class1 = Zhuxian(handle,num=2,guanqia="SK-5")
     temp_class1.start_once()

@@ -170,7 +170,7 @@ def get_handle(resolution=[1920,1080]): #now only the 夜神 is supported
             if win32gui.GetWindowText(hWnd) in [handle_infor[i+1]]  else None, hWndChildList)
             try:
                 win = hWndChildList[0][0]
-                print("当前检测到{}模拟器".format(handle_infor[i]))
+                print("当前检测到{}".format(handle_infor[i]))
                 exist = True
                 break
             except:

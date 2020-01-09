@@ -254,9 +254,6 @@ def pic_load_ram():
         temp_im = pic_resize(pic_path,window_resolution,guanqia_pic_res[keys])
         guanqia_pic[keys] = np.array(temp_im)
 
-    for keys, pic_path in pic_where.items():
-        temp_im = pic_resize(pic_path,window_resolution,pic_where_res[keys])
-        pic_where[keys] = np.array(temp_im)
     #常量点 自定义分辨率适应
     for keys,values in points.items():
         if isinstance(values[0],int):

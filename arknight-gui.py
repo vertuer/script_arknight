@@ -251,8 +251,8 @@ class MyFrame1(wx.Frame):
             t = RunThread(self.zhuxian_num.GetStringSelection(),_get_full_name(total_class,chapter,name),self.yuanshi_choice.GetStringSelection(),temp_num,self.thresh.GetValue(),self.handle)
             self.thread_id = t
             #self.event_choise.GetCurrentSelection()
-            #t.run() #only for test
-            t.start()
+            t.run() #only for test
+            #t.start()
             self.end.Enable(True)
             #self.start.SetLabel("开始")
             #self.start.Enable(True)
@@ -295,6 +295,7 @@ class Myapp(wx.App):
         #dialog.Bind(wx.EVT_CLOSE,self.OnClose)
         dialog.Destroy()
         if result == wx.ID_OK:
+            #handle = get_handle()
             config_ark.pic_load_ram()  # 将配置文件中的图像载入内存
             #self.SetTopWindow(self.frame1)
             self.frame1.Show()
